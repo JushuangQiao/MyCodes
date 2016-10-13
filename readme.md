@@ -1,1 +1,1 @@
-Codes Studing!
+Codes Studying!
