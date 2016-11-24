@@ -4,3 +4,5 @@ The answer of leetcode.
 2:Add Two Numbers
 3:Longest Substring Without Repeating Characters
 6:ZigZag Conversion
+7:Reverse Integer
+8:String to Integer (atoi)
