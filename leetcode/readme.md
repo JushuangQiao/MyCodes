@@ -8,3 +8,4 @@ The answer of leetcode.
 8:String to Integer (atoi)
 9:Palindrome Number
 11:Container With Most Water
+14: Longest Common Prefix
