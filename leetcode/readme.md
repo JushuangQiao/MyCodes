@@ -23,3 +23,5 @@ The answer of leetcode.
 20:Valid Parentheses
 
 21:Merge Two Sorted Lists
+
+28:Implement strStr()
