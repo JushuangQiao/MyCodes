@@ -26,5 +26,9 @@ The answer of leetcode.
 
 28:Implement strStr()
 
+415:Add Strings
+
+441:Arranging Coins
+
 455:Assign Cookies
 
