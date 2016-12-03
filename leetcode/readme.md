@@ -26,6 +26,8 @@ The answer of leetcode.
 
 28:Implement strStr()
 
+412:Fizz Buzz
+
 414:Third Maximum Number
 
 415:Add Strings
