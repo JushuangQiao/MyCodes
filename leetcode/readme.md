@@ -26,6 +26,8 @@ The answer of leetcode.
 
 28:Implement strStr()
 
+414:Third Maximum Number
+
 415:Add Strings
 
 441:Arranging Coins
