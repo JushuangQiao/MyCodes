@@ -1,42 +1,21 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}主页{% endblock %}
+
 {% block content %}
 {% block page_content %}
     <div class="page-header">
         <h1 style="margin-left:80px">
-            Hello, World!
+            Hello, {% if name %}{{ name }}{% else %}World{% endif %}!
         </h1>
     </div>
-{% endblock %}
 <p style="color:red;margin-left:80px">
     <font size="4">
-    当前时间: {{ moment(current_time).format('YYYY.M.D HH:mm') }}
+        当前时间: {{ moment(current_time).format('YYYY.M.D HH:mm') }}
     </font>
 </p>
+{% endblock %}
 <hr>
-<p>段落<br />不产生新段落,只在显示是换行</p>
-<!--这是一个注释-->
-<p>段落
-        前面这些空格是没用的
-直接换行也是没用的</p>
 <a href="http://www.zhihu.com">知乎</a>
-<br />
-<b>这个文本是加粗的</b>
-<br />
-<strong>这个文本是加粗的</strong>
-<br />
-<big>这个文本字体放大</big>
-<br />
-<em>这个文本是斜体的</em>
-<br />
-<i>这个文本是斜体的</i>
-<br />
-<small>这个文本是缩小的</small>
-<br />
-这个文本包含
-<sub>下标</sub>
-<br />
-这个文本包含
-<sup>上标</sup>
 {% endblock %}
