@@ -22,8 +22,8 @@ class NameForm(FlaskForm):
 
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
-    name = session.get('name')
+def index(name='World'):
+    name = session.get('name') if session.get('name') else name
     return render_template('index.html', name=name, current_time=datetime.utcnow())
 
 
