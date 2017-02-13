@@ -22,7 +22,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/flasky'
+    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/test_flasky'
 
 
 class ProductionConfig(Config):
