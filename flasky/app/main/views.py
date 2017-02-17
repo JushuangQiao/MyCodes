@@ -2,11 +2,12 @@
 
 from datetime import datetime
 from flask import render_template, session, url_for, redirect, flash
-
+from setting.config import Config
 from . import main
 from .forms import NameForm
 from .. import db
 from ..models.models import User
+from ..email import send_email
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -25,6 +26,8 @@ def user(name='World'):
             username = User(username=form.name.data)
             db.session.add(username)
             session['known'] = False
+            if Config.FLASKY_ADMIN:
+                send_email(Config.FLASKY_ADMIN, 'New User', 'mail/new_user', user=username)
         else:
             session['known'] = True
         session['name'] = form.name.data.capitalize()
