@@ -13,7 +13,7 @@ from ..email import send_email
 @main.route('/', methods=['GET', 'POST'])
 def index(name='World'):
     name = session.get('name') if session.get('name') else name
-    return render_template('index.html', name=name, current_time=datetime.utcnow())
+    return render_template('main/index.html', name=name, current_time=datetime.utcnow())
 
 
 @main.route('/user/<name>', methods=['GET', 'POST'])
@@ -33,4 +33,4 @@ def user(name='World'):
         session['name'] = form.name.data.capitalize()
         return redirect(url_for('main.user', name=session.get('name')))
     name = session.get('name') if session.get('name') else name
-    return render_template('user.html', form=form, name=name, known=session.get('known', False))
+    return render_template('main/user.html', form=form, name=name, known=session.get('known', False))
