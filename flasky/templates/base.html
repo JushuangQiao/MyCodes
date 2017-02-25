@@ -18,11 +18,18 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/user/{{ name }}">用户</a>
+            <a class="navbar-brand" href="{{ url_for('main.user', name=name) }}">用户</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">主页</a></li>
+                <li><a href="{{ url_for('main.index') }}">主页</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('auth.logout') }}">登出</a></li>
+                {% else %}
+                <li><a href="{{ url_for('auth.login') }}">登录</a></li>
+                {% endif %})
             </ul>
         </div>
     </div>

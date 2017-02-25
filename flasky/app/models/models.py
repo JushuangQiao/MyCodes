@@ -36,14 +36,16 @@ class User(UserMixin, db.Model):
     def verify_password(self, ps):
         return check_password_hash(self.password_hash, ps)
 
-    def __init__(self, username, password='123456', role_id=2):
+    def __init__(self, username, email, role_id=2, **kwargs):
         self.username = username
-        self.password = password
-        # self.age = age
+        self.email = email
         self.role_id = role_id
+        self.age = kwargs.get('age')
+        self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
+                              generate_password_hash('123456'))
 
     def __repr__(self):
-        return '<user {0}>'.format(self.name)
+        return '<user {0}>'.format(self.username)
 
 
 @login_manager.user_loader

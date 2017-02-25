@@ -7,18 +7,22 @@ from app.models.models import User
 class TestUserModel(unittest.TestCase):
 
     def test_password_setter(self):
-        u = User('test')
+        u = User('test', '123@gmail.com', password='123456')
+        # u = User(password='123456')
         self.assertTrue(u.password_hash is not None)
 
-    def test_no_paaword_getter(self):
-        u = User('test')
+    def test_no_password_getter(self):
+        u = User('test', 'test@gmail.com', password='123456')
+        # u = User(password='123456')
         with self.assertRaises(AttributeError):
             u.password
 
     def test_password_verification(self):
-        u = User('test')
+        u = User('test', 'ver@gmail.com', password='123456')
+        # u = User(password='123456')
         self.assertTrue(u.verify_password('123456'))
         self.assertFalse(u.verify_password('test'))
 
     def test_password_salts_are_random(self):
-        self.assertFalse(User('a').password_hash == User('b').password_hash)
+        self.assertFalse(User('a', 'a@qq.com', password='123456').password_hash ==
+                         User('b', 'b@qq.com', password='123456').password_hash)

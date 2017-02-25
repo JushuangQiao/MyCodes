@@ -1,4 +1,4 @@
-{% extends "main/base.html" %}
+{% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}用户{% endblock %}
@@ -12,7 +12,7 @@
 {% endfor %}
 {% block page_content %}
     <div class="page-header">
-        <h1 style="margin-left:80px">Hello, {{ name }}!</h1>
+        <h1 style="margin-left:80px">Hello, {{ current_user.username }}!</h1>
         {% if not known %}
         <p style="margin-left:85px">Pleased to meet you!</p>
         {% else %}
