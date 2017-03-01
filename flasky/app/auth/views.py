@@ -1,10 +1,10 @@
 # coding=utf-8
 
 from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from ..models.models import User
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .. import db
 
 
@@ -40,3 +40,18 @@ def register():
         flash(u'注册成功')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
+
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        # 同样的问题，验证密码不成功，后续解决!
+        if current_user.verify_password(form.old_password.data):
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            flash(u'密码已修改')
+            return redirect(url_for('main.index'))
+        else:
+            flash(u'密码错误')
+    return render_template('auth/change_password.html', form=form)
