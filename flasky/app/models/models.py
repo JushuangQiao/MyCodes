@@ -6,11 +6,38 @@ from .. import db
 from .. import login_manager
 
 
+class Permission:
+    FOLLOW = 0x01
+    COMMENT = 0x02
+    WRITE_ARTILES = 0x04
+    MODERATE_COMMENTS = 0x08
+    ADMINISTER = 0x80
+
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
+    default = db.Column(db.Boolean, default=False, index=True)
+    permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
+
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'User': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTILES, True),
+            'Moderator': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTILES |
+                          Permission.MODERATE_COMMENTS, False),
+            'Administrator': (0xff, False)
+        }
+        for role in roles:
+            r = Role.query.filter_by(name=role).first()
+            if r is None:
+                r = Role(name=role)
+            r.permissions = roles[role][0]
+            r.default = roles[role][1]
+            db.session.add(r)
+        db.session.commit()
 
     def __repr__(self):
         return '<role {0}>'.format(self.name)
