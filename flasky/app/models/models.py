@@ -65,14 +65,14 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, ps)
 
     def __init__(self, **kwargs):
-        super(User, **kwargs)
+        super(User, self).__init__(**kwargs)
         self.username = kwargs.get('username')
         self.email = kwargs.get('email')
         self.age = kwargs.get('age')
         self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
                               generate_password_hash('123456'))
         if self.role is None:
-            if self.email == current_app.config['FLASK_ADMIN']:
+            if self.email == current_app.config['FLASKY_ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
