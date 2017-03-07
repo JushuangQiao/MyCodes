@@ -1,7 +1,8 @@
 # coding=utf-8
 
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask import current_app
+from flask_login import UserMixin, AnonymousUserMixin
 from .. import db
 from .. import login_manager
 
@@ -63,16 +64,37 @@ class User(UserMixin, db.Model):
     def verify_password(self, ps):
         return check_password_hash(self.password_hash, ps)
 
-    def __init__(self, username, email, role_id=2, **kwargs):
-        self.username = username
-        self.email = email
-        self.role_id = role_id
+    def __init__(self, **kwargs):
+        super(User, **kwargs)
+        self.username = kwargs.get('username')
+        self.email = kwargs.get('email')
         self.age = kwargs.get('age')
         self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
                               generate_password_hash('123456'))
+        if self.role is None:
+            if self.email == current_app.config['FLASK_ADMIN']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
+
+    def can(self, permissions):
+        return self.role is not None and (self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.can(Permission.ADMINISTER)
 
     def __repr__(self):
         return '<user {0}>'.format(self.username)
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
 
 
 @login_manager.user_loader
