@@ -88,6 +88,9 @@ class User(UserMixin, db.Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
+    '''
+    匿名用户
+    '''
     def can(self, permissions):
         return False
 
