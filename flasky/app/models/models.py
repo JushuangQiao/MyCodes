@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
@@ -52,6 +53,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     age = db.Column(db.Integer, nullable=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    real_name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text())
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
 
     @property
     def password(self):
@@ -82,6 +88,10 @@ class User(UserMixin, db.Model):
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
+
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
 
     def __repr__(self):
         return '<user {0}>'.format(self.username)
