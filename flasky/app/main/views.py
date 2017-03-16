@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from datetime import datetime
-from flask import render_template, session, url_for, redirect, flash
+from flask import render_template, session, url_for, redirect, flash, abort
 from setting.config import Config
 from . import main
 from .forms import NameForm
@@ -34,3 +34,11 @@ def user(name='World'):
         return redirect(url_for('main.user', name=session.get('name')))
     name = session.get('name') if session.get('name') else name
     return render_template('main/user.html', form=form, name=name, known=session.get('known', False))
+
+
+@main.route('/user/<username>/details')
+def user_detail(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        abort(404)
+    return render_template('main/user_detail.html', user=user)

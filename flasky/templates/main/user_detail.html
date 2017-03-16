@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}用户资料{% endblock %}
+
+{% block content %}
+{% block page_content %}
+<h1 style="margin-left:140px;color:green">{{ user.username }}</h1>
+<h2 style="margin-left:160px">
+    姓名:     {% if user.real_name %}{{ user.real_name }}{% endif %}
+    <br><br>
+    年龄:     {% if user.age %}{{ user.age }}{% endif %}
+    <br><br>
+    地址:     {% if user.location %}{{ user.location }}{% endif %}
+    <br><br>
+    {% if current_user.is_administrator %}
+        邮箱:     <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+    {% endif %}
+</h2>
+<h2 style="margin-left:100px">
+    注册时间:   {% if user.member_since %}{{ user.member_since }}{% endif %}
+</h2>
+<h2 style="margin-left:40px">
+    {% if user.last_seen %}上次登录时间:  {{ user.last_seen }}{% endif %}
+</h2>
+<h2 style="margin-left:100px">
+    关于用户:   {% if about_me %}{{ about_me }}{% endif %}
+</h2>
+
+{% endblock %}
+{% endblock %}
