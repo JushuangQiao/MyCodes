@@ -4,7 +4,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
-from .. import db
+from . import *
 from .. import login_manager
 
 
@@ -18,11 +18,11 @@ class Permission:
 
 class Role(db.Model):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    default = db.Column(db.Boolean, default=False, index=True)
-    permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    id = Column(Integer, primary_key=True)
+    name = Column(db.String(64), unique=True)
+    default = Column(Boolean, default=False, index=True)
+    permissions = Column(Integer)
+    users = relationship('User', backref='role', lazy='dynamic')
 
     @staticmethod
     def insert_roles():
@@ -38,8 +38,8 @@ class Role(db.Model):
                 r = Role(name=role)
             r.permissions = roles[role][0]
             r.default = roles[role][1]
-            db.session.add(r)
-        db.session.commit()
+            session.add(r)
+        session.commit()
 
     def __repr__(self):
         return '<role {0}>'.format(self.name)
@@ -47,17 +47,17 @@ class Role(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True)
-    password_hash = db.Column(db.String(64))
-    email = db.Column(db.String(64), unique=True, index=True)
-    age = db.Column(db.Integer, nullable=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    real_name = db.Column(db.String(64))
-    location = db.Column(db.String(64))
-    about_me = db.Column(db.Text())
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
-    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    id = Column(Integer, primary_key=True)
+    username = Column(String(64), index=True)
+    password_hash = Column(String(64))
+    email = Column(String(64), unique=True, index=True)
+    age = Column(Integer, nullable=True)
+    role_id = Column(Integer, ForeignKey('roles.id'))
+    real_name = Column(String(64))
+    location = Column(String(64))
+    about_me = Column(Text())
+    member_since = Column(DateTime(), default=datetime.utcnow)
+    last_seen = Column(DateTime(), default=datetime.utcnow)
 
     @property
     def password(self):
