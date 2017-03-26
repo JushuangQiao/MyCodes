@@ -2,12 +2,14 @@
 
 from datetime import datetime
 from flask import render_template, session, url_for, redirect, flash, abort
-from setting.config import Config
+from flask_login import login_required, current_user
+from setting import Config
 from . import main
-from .forms import NameForm
+from .forms import NameForm, ProfileForm, EditAdminForm
 from .. import db
-from ..models.models import User
+from ..models.models import User, Role
 from ..email import send_email
+from ..decorators import admin_required
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -42,3 +44,49 @@ def user_detail(username):
     if user is None:
         abort(404)
     return render_template('main/user_detail.html', user=user)
+
+
+@main.route('/user/<username>/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile(username):
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.real_name = form.real_name.data
+        current_user.age = form.age.data
+        current_user.location = form.location.data
+        current_user.about_me = form.about_me.data
+        db.session.add(current_user)
+        # flash(u'您的资料已更改')
+        return redirect(url_for('main.user_detail', username=current_user.username))
+    form.real_name = current_user.real_name
+    form.age = current_user.age
+    form.location = current_user.location
+    form.about_me = current_user.about_me
+    return render_template('main/edit_profile.html', form=form)
+
+
+@main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profile_admin(id):
+    user = User.query.get_or_404(id)
+    form = EditAdminForm(user=user)
+    if form.validate_on_submit():
+        user.email = form.email.data
+        user.username = form.username.data
+        # user.confirmed = form.confirmed.data
+        user.role = Role.query.get(form.role.data)
+        user.real_name = form.real_name.data
+        user.location = form.location.data
+        user.about_me = form.about_me.data
+        db.session.add(user)
+        # flash('The profile has been updated.')
+        return redirect(url_for('main.user', name=user.username))
+    form.email.data = user.email
+    form.username.data = user.username
+    # form.confirmed.data = user.confirmed
+    form.role.data = user.role_id
+    form.real_name.data = user.real_name
+    form.location.data = user.location
+    form.about_me.data = user.about_me
+    return render_template('main/edit_profile.html', form=form, user=user)

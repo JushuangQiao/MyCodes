@@ -90,8 +90,7 @@ class User(UserMixin, db.Model):
         return self.can(Permission.ADMINISTER)
 
     def ping(self):
-        self.last_seen = datetime.utcnow()
-        db.session.add(self)
+        self.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     def __repr__(self):
         return '<user {0}>'.format(self.username)

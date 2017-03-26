@@ -7,25 +7,34 @@
 {% block page_content %}
 <h1 style="margin-left:140px;color:green">{{ user.username }}</h1>
 <h2 style="margin-left:160px">
-    姓名:     {% if user.real_name %}{{ user.real_name }}{% endif %}
+    姓名: {% if user.real_name %}{{ user.real_name }}{% endif %}
     <br><br>
-    年龄:     {% if user.age %}{{ user.age }}{% endif %}
+    年龄: {% if user.age %}{{ user.age }}{% endif %}
     <br><br>
-    地址:     {% if user.location %}{{ user.location }}{% endif %}
+    地址:{% if user.location %}{{ user.location }}{% endif %}
     <br><br>
     {% if current_user.is_administrator %}
-        邮箱:     <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+        邮箱:<a href="mailto:{{ user.email }}">{{ user.email }}</a>
     {% endif %}
 </h2>
 <h2 style="margin-left:100px">
-    注册时间:   {% if user.member_since %}{{ user.member_since }}{% endif %}
+    注册时间:{% if user.member_since %}{{ user.member_since }}{% endif %}
 </h2>
 <h2 style="margin-left:40px">
     {% if user.last_seen %}上次登录时间:  {{ user.last_seen }}{% endif %}
 </h2>
-<h2 style="margin-left:100px">
-    关于用户:   {% if about_me %}{{ about_me }}{% endif %}
+<h2 style="margin-left:130px">
+    关于我:{% if about_me %}{{ about_me }}{% endif %}
 </h2>
-
+{% if user == current_user and not current_user.is_administrator() %}
+<a style="margin-left:140px;color:blue" class="btn btn-default" href="{{ url_for('main.edit_profile', username=current_user.username) }}">
+    编辑资料
+</a>
+{% endif %}
+{% if current_user.is_administrator() %}
+<a style="margin-left:140px" class="btn btn-danger" href="{{ url_for('main.edit_profile_admin', id=user.id) }}">
+    编辑资料 [Admin]
+</a>
+{% endif %}
 {% endblock %}
 {% endblock %}
