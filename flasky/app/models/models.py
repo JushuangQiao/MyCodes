@@ -11,7 +11,7 @@ from .. import login_manager
 class Permission:
     FOLLOW = 0x01
     COMMENT = 0x02
-    WRITE_ARTILES = 0x04
+    WRITE_ARTICLES = 0x04
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0x80
 
@@ -27,8 +27,8 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'User': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTILES, True),
-            'Moderator': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTILES |
+            'User': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES, True),
+            'Moderator': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES |
                           Permission.MODERATE_COMMENTS, False),
             'Administrator': (0xff, False)
         }
@@ -58,6 +58,7 @@ class User(UserMixin, db.Model):
     about_me = Column(Text())
     member_since = Column(DateTime(), default=datetime.utcnow)
     last_seen = Column(DateTime(), default=datetime.utcnow)
+    posts = relationship('Post', backref='author', lazy='dynamic')
 
     @property
     def password(self):
@@ -94,6 +95,14 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<user {0}>'.format(self.username)
+
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = Column(Integer, primary_key=True)
+    body = Column(Text)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
+    author_id = Column(Integer, ForeignKey('users.id'))
 
 
 class AnonymousUser(AnonymousUserMixin):

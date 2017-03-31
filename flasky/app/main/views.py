@@ -5,17 +5,22 @@ from flask import render_template, session, url_for, redirect, flash, abort
 from flask_login import login_required, current_user
 from setting import Config
 from . import main
-from .forms import NameForm, ProfileForm, EditAdminForm
+from .forms import NameForm, ProfileForm, EditAdminForm, PostForm
 from .. import db
-from ..models.models import User, Role
+from ..models.models import User, Role, Permission, Post
 from ..email import send_email
 from ..decorators import admin_required
 
 
 @main.route('/', methods=['GET', 'POST'])
-def index(name='World'):
-    name = session.get('name') if session.get('name') else name
-    return render_template('main/index.html', name=name, current_time=datetime.utcnow())
+def index():
+    form = PostForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        return redirect(url_for('main.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('main/index.html', form=form, posts=posts)
 
 
 @main.route('/user/<name>', methods=['GET', 'POST'])
@@ -57,6 +62,7 @@ def edit_profile(username):
         current_user.about_me = form.about_me.data
         db.session.add(current_user)
         # flash(u'您的资料已更改')
+        print current_user.about_me
         return redirect(url_for('main.user_detail', username=current_user.username))
     form.real_name = current_user.real_name
     form.age = current_user.age

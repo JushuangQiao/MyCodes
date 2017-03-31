@@ -24,7 +24,7 @@
     {% if user.last_seen %}上次登录时间:  {{ user.last_seen }}{% endif %}
 </h2>
 <h2 style="margin-left:130px">
-    关于我:{% if about_me %}{{ about_me }}{% endif %}
+    关于我:{% if user.about_me %}{{ user.about_me }}{% endif %}
 </h2>
 {% if user == current_user and not current_user.is_administrator() %}
 <a style="margin-left:140px;color:blue" class="btn btn-default" href="{{ url_for('main.edit_profile', username=current_user.username) }}">
