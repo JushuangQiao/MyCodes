@@ -60,6 +60,27 @@ class User(UserMixin, db.Model):
     last_seen = Column(DateTime(), default=datetime.utcnow)
     posts = relationship('Post', backref='author', lazy='dynamic')
 
+    @staticmethod
+    def generate_fake(count=32):
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            u = User(email=forgery_py.internet.email_address(),
+                     username=forgery_py.internet.user_name(True),
+                     password_hash=forgery_py.lorem_ipsum.word(),
+                     real_name=forgery_py.name.full_name(),
+                     location=forgery_py.address.city(),
+                     about_me=forgery_py.lorem_ipsum.sentence(),
+                     member_since=forgery_py.date.date(True))
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute.')
@@ -103,6 +124,21 @@ class Post(db.Model):
     body = Column(Text)
     timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey('users.id'))
+
+    @staticmethod
+    def generate_fake(count=32):
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+                     timestamp=forgery_py.date.date(True),
+                     author=u)
+            db.session.add(p)
+            db.session.commit()
 
 
 class AnonymousUser(AnonymousUserMixin):

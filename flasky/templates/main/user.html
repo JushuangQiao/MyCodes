@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "main/_macros.html" as macros %}
 
 {% block title %}用户{% endblock %}
 
@@ -17,4 +18,9 @@
 <a style="margin-left:80px" href="{{ url_for('auth.change_password') }}">修改密码</a>
 <h3 style="margin-left:80px">{{ user.username }}的文章</h3>
 {% include 'main/_posts.html' %}
+{% if pagination %}
+<div class="pagination" style="margin-left:80px">
+    {{ macros.pagination_widget(pagination, 'main.index') }}
+</div>
+{% endif %}
 {% endblock %}

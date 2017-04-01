@@ -1,14 +1,12 @@
 # coding=utf-8
 
-from datetime import datetime
-from flask import render_template, session, url_for, redirect, flash, abort
+from flask import render_template, session, url_for, redirect, request, abort
 from flask_login import login_required, current_user
-from setting import Config
+# from setting import Config
 from . import main
-from .forms import NameForm, ProfileForm, EditAdminForm, PostForm
+from .forms import ProfileForm, EditAdminForm, PostForm
 from .. import db
 from ..models.models import User, Role, Permission, Post
-from ..email import send_email
 from ..decorators import admin_required
 
 
@@ -19,17 +17,21 @@ def index():
         post = Post(body=form.body.data, author=current_user._get_current_object())
         db.session.add(post)
         return redirect(url_for('main.index'))
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('main/index.html', form=form, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=10, error_out=False)
+    posts = pagination.items
+    return render_template('main/index.html', form=form, posts=posts, pagination=pagination)
 
 
 @main.route('/user/<username>', methods=['GET', 'POST'])
 def user(username='World'):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
-        abort(404)
-    posts = user.posts.order_by(Post.timestamp.desc()).all()
-    return render_template('main/user.html', user=user, posts=posts)
+    user = User.query.filter_by(username=username).first_or_404()
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=10, error_out=False)
+    posts = pagination.items
+    return render_template('main/user.html', user=user, posts=posts, pagination=pagination)
 
 
 @main.route('/user/<username>/details')
