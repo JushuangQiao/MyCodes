@@ -4,25 +4,17 @@
 {% block title %}用户{% endblock %}
 
 {% block content %}
-{% for message in get_flashed_messages() %}
-    <div class="alert alert-warning" style="color:red;background-color:palegreen;margin-left:300px;margin-right:800px">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message }}
-    </div>
-{% endfor %}
 {% block page_content %}
     <div class="page-header">
-        <h1 style="margin-left:80px">Hello, {{ current_user.username }}!</h1>
+        <h1 style="margin-left:80px">Hello, {{ user.username }}!</h1>
         {% if not known %}
         <p style="margin-left:85px">Pleased to meet you!</p>
         {% else %}
         <p style="margin-left:85px">Happy to see you again!</p>
         {% endif %}
     </div>
-<!-- 下面这个表单，需要之后学习怎么设置格式，目前的太偏了-->
-<h2 style="margin-left:80px;margin-right:300px">
-    {{ wtf.quick_form(form) }}
-</h2>
 {% endblock %}
 <a style="margin-left:80px" href="{{ url_for('auth.change_password') }}">修改密码</a>
+<h3 style="margin-left:80px">{{ user.username }}的文章</h3>
+{% include 'main/_posts.html' %}
 {% endblock %}

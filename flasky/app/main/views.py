@@ -23,24 +23,13 @@ def index():
     return render_template('main/index.html', form=form, posts=posts)
 
 
-@main.route('/user/<name>', methods=['GET', 'POST'])
-def user(name='World'):
-    form = NameForm()
-    if form.validate_on_submit():
-        username = User.query.filter_by(username=form.name.data).first()
-        if username is None:
-            flash(u'不存在该用户')
-            username = User(username=form.name.data)
-            db.session.add(username)
-            session['known'] = False
-            if Config.FLASKY_ADMIN:
-                send_email(Config.FLASKY_ADMIN, 'New User', 'mail/new_user', user=username)
-        else:
-            session['known'] = True
-        session['name'] = form.name.data.capitalize()
-        return redirect(url_for('main.user', name=session.get('name')))
-    name = session.get('name') if session.get('name') else name
-    return render_template('main/user.html', form=form, name=name, known=session.get('known', False))
+@main.route('/user/<username>', methods=['GET', 'POST'])
+def user(username='World'):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        abort(404)
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    return render_template('main/user.html', user=user, posts=posts)
 
 
 @main.route('/user/<username>/details')
