@@ -4,6 +4,8 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
+import bleach
+from markdown import markdown
 from . import *
 from .. import login_manager
 
@@ -118,10 +120,29 @@ class User(UserMixin, db.Model):
         return '<user {0}>'.format(self.username)
 
 
+class AnonymousUser(AnonymousUserMixin):
+    '''
+    匿名用户
+    '''
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
 class Post(db.Model):
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
     body = Column(Text)
+    body_html = Column(Text)
     timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey('users.id'))
 
@@ -140,20 +161,11 @@ class Post(db.Model):
             db.session.add(p)
             db.session.commit()
 
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags,
+                                                       strip=True))
 
-class AnonymousUser(AnonymousUserMixin):
-    '''
-    匿名用户
-    '''
-    def can(self, permissions):
-        return False
-
-    def is_administrator(self):
-        return False
-
-login_manager.anonymous_user = AnonymousUser
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+db.event.listen(Post.body, 'set', Post.on_changed_body)
