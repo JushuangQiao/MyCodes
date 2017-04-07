@@ -47,6 +47,13 @@ class Role(db.Model):
         return '<role {0}>'.format(self.name)
 
 
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = Column(Integer, db.ForeignKey('users.id'), primary_key=True)
+    followed_id = Column(Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = Column(DateTime(), default=datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
@@ -61,6 +68,12 @@ class User(UserMixin, db.Model):
     member_since = Column(DateTime(), default=datetime.utcnow)
     last_seen = Column(DateTime(), default=datetime.utcnow)
     posts = relationship('Post', backref='author', lazy='dynamic')
+    followed = db.relationship('Follow', foreign_keys=[Follow.follower_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic', cascade='all, delete-orphan')
+    followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic', cascade='all, delete-orphan')
 
     @staticmethod
     def generate_fake(count=32):
@@ -101,6 +114,7 @@ class User(UserMixin, db.Model):
         self.age = kwargs.get('age')
         self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
                               generate_password_hash('123456'))
+        self.follow(self)
         if self.role is None:
             if self.email == current_app.config['FLASKY_ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
@@ -115,6 +129,34 @@ class User(UserMixin, db.Model):
 
     def ping(self):
         self.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(followed=user)
+            self.followed.append(f)
+
+    def unfollow(self, user):
+        f = self.followed.filter_by(followed_id=user.id).first()
+        if f:
+            self.followed.remove(f)
+
+    def is_following(self, user):
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+
+    def is_followed_by(self, user):
+        return self.followers.filter_by(follower_id=user.id).first() is not None
+
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
+
+    @staticmethod
+    def add_follow_self():
+        for user in User.query.all():
+            if not user.is_following(user):
+                user.follow(user)
+                db.session.add(user)
+                db.session.commit()
 
     def __repr__(self):
         return '<user {0}>'.format(self.username)

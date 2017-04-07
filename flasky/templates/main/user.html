@@ -16,8 +16,19 @@
     </div>
 {% endblock %}
 <a style="margin-left:80px" href="{{ url_for('auth.change_password') }}">修改密码</a>
-<h3 style="margin-left:80px">{{ user.username }}的文章</h3>
-{% include 'main/_posts.html' %}
+<div style="margin-left:80px" class="post-tabs">
+    <ul class="nav nav-tabs">
+        <li {% if not show_followed %} class="active"{% endif %}>
+            <a href="{{ url_for('main.show_all') }}">全部</a>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li {% if show_followed %} class="active"{% endif %}>
+            <a href="{{ url_for('main.show_followed') }}">关注</a>
+        </li>
+        {% endif %}
+    </ul>
+    {% include 'main/_posts.html' %}
+</div>
 {% if pagination %}
 <div class="pagination" style="margin-left:80px">
     {{ macros.pagination_widget(pagination, 'main.index') }}
