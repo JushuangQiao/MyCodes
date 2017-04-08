@@ -5,9 +5,9 @@ from flask import make_response
 from flask_login import login_required, current_user
 # from setting import Config
 from . import main
-from .forms import ProfileForm, EditAdminForm, PostForm
+from .forms import ProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
-from ..models.models import User, Role, Permission, Post
+from ..models.models import User, Role, Permission, Post, Comment
 from ..decorators import admin_required, permission_required
 
 
@@ -98,10 +98,21 @@ def edit_profile_admin(id):
     return render_template('main/edit_profile.html', form=form, user=user)
 
 
-@main.route('/post/<int:id>')
+@main.route('/post/<int:id>', methods=['GET', 'POST'])
 def post(id):
     posts = Post.query.get_or_404(id)
-    return render_template('main/post.html', posts=[posts])
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data, post=posts, author=current_user._get_current_object())
+        db.session.add(comment)
+        return redirect(url_for('main.post', id=posts.id, page=-1))
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (posts.comments.count() - 1) / 10 + 1
+    pagination = posts.comments.order_by(Comment.timestamp.asc()).paginate(
+        page, per_page=10, error_out=False)
+    comments = pagination.items
+    return render_template('main/post.html', posts=[posts], form=form, pagination=pagination, comments=comments)
 
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -188,3 +199,33 @@ def show_followed():
     resp = make_response(redirect(url_for('main.user', username=current_user.username)))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
+
+
+@main.route('/moderate')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate():
+    page = request.args.get('page', 1, type=int)
+    pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(page, per_page=10, error_out=False)
+    comments = pagination.items
+    return render_template('main/moderate.html', comments=comments, pagination=pagination, page=page)
+
+
+@main.route('/moderate/enable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_enable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = False
+    db.session.add(comment)
+    return redirect(url_for('main.moderate', page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/moderate/disable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_disable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = True
+    db.session.add(comment)
+    return redirect(url_for('main.moderate', page=request.args.get('page', 1, type=int)))

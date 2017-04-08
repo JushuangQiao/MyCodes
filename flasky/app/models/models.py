@@ -68,6 +68,7 @@ class User(UserMixin, db.Model):
     member_since = Column(DateTime(), default=datetime.utcnow)
     last_seen = Column(DateTime(), default=datetime.utcnow)
     posts = relationship('Post', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys=[Follow.follower_id],
                                backref=db.backref('follower', lazy='joined'),
                                lazy='dynamic', cascade='all, delete-orphan')
@@ -114,12 +115,12 @@ class User(UserMixin, db.Model):
         self.age = kwargs.get('age')
         self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
                               generate_password_hash('123456'))
-        self.follow(self)
         if self.role is None:
             if self.email == current_app.config['FLASKY_ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+        self.follow(self)
 
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
@@ -185,8 +186,9 @@ class Post(db.Model):
     id = Column(Integer, primary_key=True)
     body = Column(Text)
     body_html = Column(Text)
-    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
+    timestamp = Column(DateTime(), index=True, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey('users.id'))
+    comments = relationship('Comment', backref='post', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=32):
@@ -211,3 +213,21 @@ class Post(db.Model):
                                                        strip=True))
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True)
+    body = Column(Text)
+    body_html = Column(Text)
+    timestamp = Column(DateTime(), index=True, default=datetime.utcnow)
+    disabled = Column(Boolean)
+    author_id = Column(Integer, ForeignKey('users.id'))
+    post_id = Column(Integer, ForeignKey('posts.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i', 'strong']
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
