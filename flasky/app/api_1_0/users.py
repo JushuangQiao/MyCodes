@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from flask import jsonify, request, current_app, url_for
+from flask import jsonify, request, url_for
 from . import api
 from ..models.models import User, Post
 
@@ -16,8 +16,7 @@ def get_user_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     pagination = user.posts.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
-        error_out=False)
+        page, per_page=10, error_out=False)
     posts = pagination.items
     prev = None
     if pagination.has_prev:
@@ -38,8 +37,7 @@ def get_user_followed_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     pagination = user.followed_posts.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
-        error_out=False)
+        page, per_page=10, error_out=False)
     posts = pagination.items
     prev = None
     if pagination.has_prev:
