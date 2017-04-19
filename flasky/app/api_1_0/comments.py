@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from flask import jsonify, request, g, url_for, current_app
+from flask import jsonify, request, g, url_for
 from .. import db
 from ..models.models import Post, Permission, Comment
 from . import api
@@ -38,8 +38,7 @@ def get_post_comments(id):
     post = Post.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
-        page, per_page=current_app.config['FLASKY_COMMENTS_PER_PAGE'],
-        error_out=False)
+        page, per_page=10, error_out=False)
     comments = pagination.items
     prev = None
     if pagination.has_prev:
@@ -65,5 +64,4 @@ def new_post_comment(id):
     db.session.add(comment)
     db.session.commit()
     return jsonify(comment.to_json()), 201, \
-        {'Location': url_for('api.get_comment', id=comment.id,
-                             _external=True)}
+        {'Location': url_for('api.get_comment', id=comment.id, _external=True)}
