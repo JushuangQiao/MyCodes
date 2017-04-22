@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_login import LoginManager
 from flask_pagedown import PageDown
-from blog.setting.config import config
+from setting import config
 
 bootstrap = Bootstrap()
 moment = Moment()

@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import os
-from blog.app import create_app, db
+from app import create_app, db
 from app.models.models import User, Role, Post, Permission, Follow, Comment
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Shell
