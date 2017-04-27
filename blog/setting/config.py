@@ -25,16 +25,16 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/flasky'
+    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/blog'
 
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/test_flasky'
+    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/test_blog'
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/flasky'
+    SQLALCHEMY_DATABASE_URI = 'mysql://qiao:123456@localhost/blog'
 
 
 config = {
