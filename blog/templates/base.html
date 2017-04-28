@@ -22,7 +22,7 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">主页</a></li>
+                <li><a href="{{ url_for('main.home') }}">主页</a></li>
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('main.user_detail', username=current_user.username) }}">资料</a></li>
                 {% endif %}
