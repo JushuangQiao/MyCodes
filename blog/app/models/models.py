@@ -15,7 +15,7 @@ from .. import login_manager
 class Permission:
     FOLLOW = 0x01
     COMMENT = 0x02
-    WRITE_ARTICLES = 0x04
+    WRITE_ARTICLES = 0x04cd
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0x80
 
@@ -23,7 +23,7 @@ class Permission:
 class Role(db.Model):
     __tablename__ = 'roles'
     id = Column(Integer, primary_key=True)
-    name = Column(db.String(64), unique=True)
+    name = Column(String(64), unique=True)
     default = Column(Boolean, default=False, index=True)
     permissions = Column(Integer)
     users = relationship('User', backref='role', lazy='dynamic')

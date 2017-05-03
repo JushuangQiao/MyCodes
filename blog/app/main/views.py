@@ -69,7 +69,7 @@ def user_detail(username):
 
 @main.route('/user/<username>/edit-profile', methods=['GET', 'POST'])
 @login_required
-def edit_profile(username):
+def edit_profile():
     form = ProfileForm()
     try:
         if form.validate_on_submit():
