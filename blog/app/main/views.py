@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from . import main
 from .forms import ProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
-from ..models.models import User, Role, Permission, Post, Comment
+from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
 
 logging.basicConfig(filename='running_error.log')
@@ -18,6 +18,8 @@ logging.basicConfig(filename='running_error.log')
 @main.route('/home', methods=['GET', 'POST'])
 def home():
     form = PostForm()
+    if current_user.is_anonymous:
+        return redirect(url_for('main.show_all'))
     try:
         if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
             post = Post(body=form.body.data, author=current_user._get_current_object())
@@ -194,7 +196,7 @@ def followers(username):
     pagination = user.followers.paginate(page, per_page=10, error_out=False)
     follows = [{'user': item.follower, 'timestamp': item.timestamp}
                for item in pagination.items]
-    return render_template('main/followers.html', user=user, title=u"关注者",
+    return render_template('main/followers.html', user=user, title=u"关注",
                            endpoint='.followers', pagination=pagination,
                            follows=follows)
 
@@ -215,11 +217,18 @@ def followed_by(username):
 
 
 @main.route('/all')
-@login_required
+# @login_required
 def show_all():
-    resp = make_response(redirect(url_for('main.user', username=current_user.username)))
-    resp.set_cookie('show_followed', '', max_age=30*24*60*60)
-    return resp
+    if current_user.is_anonymous:
+        page = request.args.get('page', 1, type=int)
+        query = Post.query
+        pagination = query.order_by(Post.timestamp.desc()).paginate(page, per_page=10, error_out=False)
+        posts = pagination.items
+        return render_template('main/all_posts.html', posts=posts, pagination=pagination)
+    else:
+        resp = make_response(redirect(url_for('main.user', username=current_user.username)))
+        resp.set_cookie('show_followed', '', max_age=30*24*60*60)
+        return resp
 
 
 @main.route('/followed')
