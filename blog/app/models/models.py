@@ -78,27 +78,6 @@ class User(UserMixin, db.Model):
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic', cascade='all, delete-orphan')
 
-    @staticmethod
-    def generate_fake(count=32):
-        from sqlalchemy.exc import IntegrityError
-        from random import seed
-        import forgery_py
-
-        seed()
-        for i in range(count):
-            u = User(email=forgery_py.internet.email_address(),
-                     username=forgery_py.internet.user_name(True),
-                     password_hash=forgery_py.lorem_ipsum.word(),
-                     real_name=forgery_py.name.full_name(),
-                     location=forgery_py.address.city(),
-                     about_me=forgery_py.lorem_ipsum.sentence(),
-                     member_since=forgery_py.date.date(True))
-            db.session.add(u)
-            try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute.')
@@ -118,10 +97,7 @@ class User(UserMixin, db.Model):
         self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
                               generate_password_hash('123456'))
         if self.role is None:
-            if self.email == current_app.config['FLASKY_ADMIN']:
-                self.role = Role.query.filter_by(permissions=0xff).first()
-            if self.role is None:
-                self.role = Role.query.filter_by(default=True).first()
+            self.role = Role.query.filter_by(default=True).first()
         self.follow(self)
 
     def can(self, permissions):
