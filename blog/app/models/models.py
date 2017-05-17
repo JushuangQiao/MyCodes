@@ -60,7 +60,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(64), index=True)
-    password_hash = Column(String(64))
+    password = Column(String(64))
     email = Column(String(64), unique=True, index=True)
     age = Column(Integer, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.id'))
@@ -78,27 +78,24 @@ class User(UserMixin, db.Model):
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic', cascade='all, delete-orphan')
 
-    @property
-    def password(self):
-        raise AttributeError('Password is not a readable attribute.')
-
-    @password.setter
-    def password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def verify_password(self, ps):
-        return check_password_hash(self.password_hash, ps)
-
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
-        self.username = kwargs.get('username')
-        self.email = kwargs.get('email')
-        self.age = kwargs.get('age')
-        self.password_hash = (generate_password_hash(kwargs.get('password')) if kwargs.get('password') else
-                              generate_password_hash('123456'))
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
-        self.follow(self)
+    def __init__(self, id=None, username=None, password=None, email=None, age=None, role_id=None, real_name=None,
+                 location=None, about_me=None, member_since=None, last_seen=None):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.age = age
+        self.password = password
+        self.role_id = Role.query.filter_by(default=True).first() if role_id is None else role_id
+        # self.follow(self)
+        self.real_name = real_name
+        self.location = location
+        self.about_me = about_me
+        self.member_since = member_since
+        self.last_seen = last_seen
+        # self.posts = posts
+        # self.comments = comments
+        # self.followed = followed
+        # self.followers = followers
 
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
