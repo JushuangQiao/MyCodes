@@ -1,8 +1,11 @@
 # coding=utf-8
 
 import os
+import logging
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+# logging
+LOG_FILE = logging.basicConfig(filename='running_error.log')
 
 
 class Config(object):

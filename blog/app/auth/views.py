@@ -5,10 +5,9 @@ from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from ..models.models import User
+from ..models.manager import UserManager
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .. import db
-
-logging.basicConfig(filename='runninr_error.log')
 
 
 @auth.before_app_request
@@ -29,7 +28,7 @@ def login():
             if user is not None:
                 login_user(user, form.remember_me.data)
                 return redirect(request.args.get('next') or url_for('main.home'))
-                flash(u'用户名或密码错误')
+                # flash(u'用户名或密码错误')
         return render_template('auth/login.html', form=form)
     except Exception, e:
         logging.error('func: login error:{0}'.format(e))
@@ -49,8 +48,7 @@ def register():
     form = RegistrationForm()
     try:
         if form.validate_on_submit():
-            user = User(email=form.email.data, password=form.password.data, username=form.username.data)
-            db.session.add(user)
+            UserManager.add_user(form)
             flash(u'注册成功')
             return redirect(url_for('auth.login'))
         return render_template('auth/register.html', form=form)
