@@ -5,7 +5,7 @@ import logging
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 # logging
-LOG_FILE = logging.basicConfig(filename='running_error.log')
+LOG_FILE = logging.basicConfig(filename='running_error.log', level=logging.INFO)
 
 
 class Config(object):

@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app, url_for
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin, AnonymousUserMixin
@@ -60,7 +59,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(64), index=True)
-    password = Column(String(64))
+    password = Column(String(128))
     email = Column(String(64), unique=True, index=True)
     age = Column(Integer, nullable=True)
     role_id = Column(Integer, ForeignKey('roles.id'))
@@ -85,7 +84,7 @@ class User(UserMixin, db.Model):
         self.email = email
         self.age = age
         self.password = password
-        self.role_id = Role.query.filter_by(default=True).first() if role_id is None else role_id
+        self.role_id = Role.query.filter_by(default=1).first().id if role_id is None else int(role_id)
         # self.follow(self)
         self.real_name = real_name
         self.location = location

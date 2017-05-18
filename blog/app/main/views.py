@@ -18,6 +18,7 @@ logging.basicConfig(filename='running_error.log')
 @main.route('/home', methods=['GET', 'POST'])
 def home():
     form = PostForm()
+    print current_user
     if current_user.is_anonymous:
         return redirect(url_for('main.show_all'))
     try:

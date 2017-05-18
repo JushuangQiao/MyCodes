@@ -2,6 +2,8 @@
 
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user
+from blog.app import login_manager
 from datetime import datetime
 from flask import current_app, url_for
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -16,9 +18,20 @@ class UserManager(object):
         user = User()
         try:
             user.username = param.username.data
-            user.password = param.password.data
+            user.password = generate_password_hash(str(param.password.data))
             user.email = param.email.data
             db.session.add(user)
+        except Exception, e:
+            logging.error('class: UserManager failed {0}'.format(e))
+
+    @staticmethod
+    def verify_password(param):
+        try:
+            user = User.query.filter_by(email=param.email.data).first()
+            if user is not None and check_password_hash(user.password, str(param.password.data)):
+                login_user(user, param.remember_me.data)
+                return user
+            return False
         except Exception, e:
             logging.error('class: UserManager failed {0}'.format(e))
 
@@ -43,17 +56,7 @@ class UserManager(object):
             except IntegrityError:
                 db.session.rollback()
 
-    @property
-    def password(self):
-        raise AttributeError('Password is not a readable attribute.')
-
-    @password.setter
-    def password(self, password):
-        self.password = generate_password_hash(password)
-
-    def verify_password(self, ps):
-        return check_password_hash(self.password, ps)
-
+    '''
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
 
@@ -117,3 +120,4 @@ class UserManager(object):
             'post_count': self.posts.count()
         }
         return json_user
+    '''

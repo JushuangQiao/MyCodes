@@ -2,7 +2,7 @@
 
 import os
 from app import create_app, db
-from app.models.models import User, Role, Post, Permission, Follow, Comment
+from app.models.models import Role, Post, Permission, Follow, Comment
 from app.models.manager import UserManager
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Shell, Server
@@ -18,7 +18,6 @@ def make_shell_context():
     ret = dict()
     ret['app'] = app
     ret['db'] = db
-    ret['User'] = User
     ret['Role'] = Role
     ret['Post'] = Post
     ret['Follow'] = Follow
