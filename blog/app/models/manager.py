@@ -6,8 +6,27 @@ from flask_login import login_user
 from blog.app import login_manager
 from datetime import datetime
 from flask import current_app, url_for
-from .models import User, Follow, Permission, Post
+from .models import User, Follow, Permission, Post, Role
 from . import db
+
+
+class RoleManager(object):
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'User': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES, True),
+            'Moderator': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES |
+                          Permission.MODERATE_COMMENTS, False),
+            'Administrator': (0xff, False)
+        }
+        for role in roles:
+            r = Role.query.filter_by(name=role).first()
+            if r is None:
+                r = Role(name=role)
+            r.permissions = roles[role][0]
+            r.default = roles[role][1]
+            db.session.add(r)
+        db.session.commit()
 
 
 class UserManager(object):
@@ -55,13 +74,17 @@ class UserManager(object):
             except IntegrityError:
                 db.session.rollback()
 
+    @staticmethod
+    def can(user, permissions):
+        if user.is_anonymous:
+            return False
+        return user.role is not None and (user.role.permissions & permissions) == permissions
+
+    @staticmethod
+    def is_administrator(user):
+        return UserManager.can(user, Permission.ADMINISTER)
+
     '''
-    def can(self, permissions):
-        return self.role is not None and (self.role.permissions & permissions) == permissions
-
-    def is_administrator(self):
-        return self.can(Permission.ADMINISTER)
-
     def ping(self):
         last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 

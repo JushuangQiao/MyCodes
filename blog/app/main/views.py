@@ -4,12 +4,12 @@ import logging
 from flask import render_template, session, url_for, redirect, request, abort
 from flask import make_response
 from flask_login import login_required, current_user
-# from setting import Config
 from . import main
 from .forms import ProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
 from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
+from blog.app.models.manager import UserManager
 
 logging.basicConfig(filename='running_error.log')
 
@@ -18,11 +18,10 @@ logging.basicConfig(filename='running_error.log')
 @main.route('/home', methods=['GET', 'POST'])
 def home():
     form = PostForm()
-    print current_user
     if current_user.is_anonymous:
         return redirect(url_for('main.show_all'))
     try:
-        if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        if UserManager.can(current_user, Permission.WRITE_ARTICLES) and form.validate_on_submit():
             post = Post(body=form.body.data, author=current_user._get_current_object())
             db.session.add(post)
             return redirect(url_for('main.home'))
@@ -72,7 +71,7 @@ def user_detail(username):
 
 @main.route('/user/<username>/edit-profile', methods=['GET', 'POST'])
 @login_required
-def edit_profile():
+def edit_profile(username):
     form = ProfileForm()
     try:
         if form.validate_on_submit():
@@ -82,7 +81,7 @@ def edit_profile():
             current_user.about_me = form.about_me.data
             db.session.add(current_user)
             # flash(u'您的资料已更改')
-            return redirect(url_for('main.user_detail', username=current_user.username))
+            return redirect(url_for('main.user_detail', username=username))
         form.real_name = current_user.real_name
         form.age = current_user.age
         form.location = current_user.location
@@ -103,7 +102,6 @@ def edit_profile_admin(id):
         if form.validate_on_submit():
             user.email = form.email.data
             user.username = form.username.data
-            # user.confirmed = form.confirmed.data
             user.role = Role.query.get(form.role.data)
             user.real_name = form.real_name.data
             user.location = form.location.data
@@ -113,7 +111,6 @@ def edit_profile_admin(id):
             return redirect(url_for('main.user', name=user.username))
         form.email.data = user.email
         form.username.data = user.username
-        # form.confirmed.data = user.confirmed
         form.role.data = user.role_id
         form.real_name.data = user.real_name
         form.location.data = user.location
@@ -148,7 +145,7 @@ def post(id):
 @login_required
 def edit_post(id):
     post = Post.query.get_or_404(id)
-    if current_user != post.author and not current_user.can(Permission.ADMINISTER):
+    if current_user != post.author and not UserManager.can(current_user, Permission.ADMINISTER):
         abort(403)
     form = PostForm()
     try:

@@ -28,7 +28,7 @@
     </h2>
     <h2 style="margin-left:130px">{{ user.posts.count() }} 篇博客</h2>
     <h2 style="margin-left:130px">
-            {% if current_user.can(Permission.FOLLOW) and user != current_user %}
+            {% if UserManager.can(current_user, Permission.FOLLOW) and user != current_user %}
                 {% if not current_user.is_following(user) %}
                 <a href="{{ url_for('main.follow', username=user.username) }}" class="btn btn-primary">
                     关注
@@ -50,12 +50,12 @@
             {% endif %}
         </h2>
         <h2>
-            {% if user == current_user and not current_user.is_administrator() %}
+            {% if user == current_user and not UserManager.is_administrator(current_user) %}
                 <a style="margin-left:140px;color:blue" class="btn btn-default" href="{{ url_for('main.edit_profile', username=current_user.username) }}">
                 编辑资料
                 </a>
             {% endif %}
-            {% if current_user.is_administrator() %}
+            {% if UserManager.is_administrator(current_user) %}
             <a style="margin-left:140px" class="btn btn-danger" href="{{ url_for('main.edit_profile_admin', id=user.id) }}">
                 编辑资料 [Admin]
             </a>
