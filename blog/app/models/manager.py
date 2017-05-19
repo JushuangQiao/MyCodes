@@ -6,7 +6,6 @@ from flask_login import login_user
 from blog.app import login_manager
 from datetime import datetime
 from flask import current_app, url_for
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from .models import User, Follow, Permission, Post
 from . import db
 
@@ -93,20 +92,6 @@ class UserManager(object):
                 user.follow(user)
                 db.session.add(user)
                 db.session.commit()
-
-    def generate_auth_token(self, expiration):
-        s = Serializer(current_app.config['SECRET_KEY'],
-                       expires_in=expiration)
-        return s.dumps({'id': self.id}).decode('ascii')
-
-    @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            data = s.loads(token)
-        except:
-            return None
-        return User.query.get(data['id'])
 
     def to_json(self):
         json_user = {
