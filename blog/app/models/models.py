@@ -13,7 +13,7 @@ from .. import login_manager
 class Permission:
     FOLLOW = 0x01
     COMMENT = 0x02
-    WRITE_ARTICLES = 0x04cd
+    WRITE_ARTICLES = 0x04
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0x80
 
@@ -25,23 +25,6 @@ class Role(db.Model):
     default = Column(Boolean, default=False, index=True)
     permissions = Column(Integer)
     users = relationship('User', backref='role', lazy='dynamic')
-
-    @staticmethod
-    def insert_roles():
-        roles = {
-            'User': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES, True),
-            'Moderator': (Permission.COMMENT | Permission.FOLLOW | Permission.WRITE_ARTICLES |
-                          Permission.MODERATE_COMMENTS, False),
-            'Administrator': (0xff, False)
-        }
-        for role in roles:
-            r = Role.query.filter_by(name=role).first()
-            if r is None:
-                r = Role(name=role)
-            r.permissions = roles[role][0]
-            r.default = roles[role][1]
-            session.add(r)
-        session.commit()
 
     def __repr__(self):
         return '<role {0}>'.format(self.name)
@@ -83,7 +66,7 @@ class User(UserMixin, db.Model):
         self.email = email
         self.age = age
         self.password = password
-        self.role_id = Role.query.filter_by(default=1).first().id if role_id is None else int(role_id)
+        self.role_id = Role.query.filter_by(default=True).first().id if role_id is None else int(role_id)
         # self.follow(self)
         self.real_name = real_name
         self.location = location
@@ -94,12 +77,6 @@ class User(UserMixin, db.Model):
         # self.comments = comments
         # self.followed = followed
         # self.followers = followers
-
-    def can(self, permissions):
-        return self.role is not None and (self.role.permissions & permissions) == permissions
-
-    def is_administrator(self):
-        return self.can(Permission.ADMINISTER)
 
     def ping(self):
         self.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -150,14 +127,7 @@ class User(UserMixin, db.Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
-    '''
-    匿名用户
-    '''
-    def can(self, permissions):
-        return False
-
-    def is_administrator(self):
-        return False
+    pass
 
 login_manager.anonymous_user = AnonymousUser
 
