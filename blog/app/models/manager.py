@@ -88,7 +88,6 @@ class UserManager(object):
     @staticmethod
     def ping(user):
         user.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # db.session.add(user)
 
     @staticmethod
     def edit_profile(user, param):
@@ -166,3 +165,31 @@ class UserManager(object):
         }
         return json_user
     '''
+
+
+class PostManager(object):
+
+    @staticmethod
+    def add_post(body=None, author=None):
+        try:
+            post = Post(body=body, author_id=author.id)
+            print post.body, post.author_id
+            db.session.add(post)
+            db.session.commit()
+        except Exception, e:
+            logging.error('class PostManager add_post failed:{0}'.format(e))
+
+    @staticmethod
+    def generate_fake(count=32):
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+                     timestamp=forgery_py.date.date(True),
+                     author_id=u)
+            db.session.add(p)
+            db.session.commit()

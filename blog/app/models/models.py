@@ -59,9 +59,8 @@ class User(UserMixin, db.Model):
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic', cascade='all, delete-orphan')
 
-    def __init__(self, id=None, username=None, password=None, email=None, age=None, role_id=None, real_name=None,
+    def __init__(self, username=None, password=None, email=None, age=None, role_id=None, real_name=None,
                  location=None, about_me=None, member_since=None, last_seen=None):
-        self.id = id
         self.username = username
         self.email = email
         self.age = age
@@ -73,8 +72,6 @@ class User(UserMixin, db.Model):
         self.about_me = about_me
         self.member_since = member_since
         self.last_seen = last_seen
-        # self.posts = posts
-        # self.comments = comments
         # self.followed = followed
         # self.followers = followers
 
@@ -142,21 +139,6 @@ class Post(db.Model):
     timestamp = Column(DateTime(), index=True, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey('users.id'))
     comments = relationship('Comment', backref='post', lazy='dynamic')
-
-    @staticmethod
-    def generate_fake(count=32):
-        from random import seed, randint
-        import forgery_py
-
-        seed()
-        user_count = User.query.count()
-        for i in range(count):
-            u = User.query.offset(randint(0, user_count - 1)).first()
-            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
-                     timestamp=forgery_py.date.date(True),
-                     author=u)
-            db.session.add(p)
-            db.session.commit()
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):

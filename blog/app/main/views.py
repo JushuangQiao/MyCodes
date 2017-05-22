@@ -9,7 +9,7 @@ from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
 from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
-from blog.app.models.manager import UserManager
+from blog.app.models.manager import UserManager, PostManager
 
 logging.basicConfig(filename='running_error.log')
 
@@ -22,8 +22,7 @@ def home():
         return redirect(url_for('main.show_all'))
     try:
         if UserManager.can(current_user, Permission.WRITE_ARTICLES) and form.validate_on_submit():
-            post = Post(body=form.body.data, author=current_user._get_current_object())
-            db.session.add(post)
+            PostManager.add_post(body=form.body.data, author=current_user)
             return redirect(url_for('main.home'))
     except Exception, e:
         logging.error('func: home writing failed:{0}'.format(e))
