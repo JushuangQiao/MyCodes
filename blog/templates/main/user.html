@@ -7,16 +7,16 @@
 {% block content %}
 {% block page_content %}
     <div class="page-header">
-        <h1 style="margin-left:80px">Hello, {{ user.username }}!</h1>
+        <h1 style="margin-left:200px">Hello, {{ user.username }}!</h1>
         {% if not known %}
-        <p style="margin-left:85px">Pleased to meet you!</p>
+        <p style="margin-left:220px">Pleased to meet you!</p>
         {% else %}
-        <p style="margin-left:85px">Happy to see you again!</p>
+        <p style="margin-left:220px">Happy to see you again!</p>
         {% endif %}
     </div>
 {% endblock %}
-<div style="margin-left:80px" class="post-tabs">
-    <ul class="nav nav-tabs">
+<div class="post-tabs">
+    <ul class="nav nav-tabs" style="margin-left:180px">
         <li {% if not show_followed %} class="active"{% endif %}>
             <a href="{{ url_for('main.show_all') }}">全部</a>
         </li>
@@ -29,7 +29,7 @@
     {% include 'main/_posts.html' %}
 </div>
 {% if pagination %}
-<div class="pagination" style="margin-left:80px">
+<div class="pagination" style="margin-left:200px">
     {{ macros.pagination_widget(pagination, 'main.home') }}
 </div>
 {% endif %}
