@@ -1,12 +1,12 @@
-<ul class="posts" style="margin-left:80px">
+<ul class="posts" style="margin-left:100px">
     {% for post in posts %}
-    <li class="post">
+    <li class="post" style="margin-left:100px">
         <div class="post-thumbnail">
             <a href="{{ url_for('main.user', username=post.author.username) }}">
                 <img class="img-rounded profile-thumbnail">
             </a>
         </div>
-        <div class="post-content" style="margin-right:80px">
+        <div class="post-content" style="margin-left:20px; margin-right:200px">
             <div class="post-date">
                 {{ moment(post.timestamp).fromNow() }}
             </div>

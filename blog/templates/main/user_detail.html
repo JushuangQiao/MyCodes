@@ -3,7 +3,6 @@
 
 {% block title %}用户资料{% endblock %}
 
-{% block content %}
 {% block page_content %}
     <h1 style="margin-left:140px;color:green">{{ user.username }}</h1>
     <h2 style="margin-left:160px">
@@ -11,20 +10,20 @@
         <br><br>
         年龄: {% if user.age %}{{ user.age }}{% endif %}
         <br><br>
-        地址:{% if user.location %}{{ user.location }}{% endif %}
+        地址: {% if user.location %}{{ user.location }}{% endif %}
         <br><br>
-        {% if current_user.is_administrator %}
-            邮箱:<a href="mailto:{{ user.email }}">{{ user.email }}</a>
+        {% if UserManager.is_administrator(current_user) %}
+            邮箱: <a href="mailto:{{ user.email }}">{{ user.email }}</a>
         {% endif %}
     </h2>
     <h2 style="margin-left:100px">
-        注册时间:{% if user.member_since %}{{ user.member_since }}{% endif %}
+        注册时间:   {% if user.member_since %}{{ user.member_since }}{% endif %}
     </h2>
     <h2 style="margin-left:40px">
         {% if user.last_seen %}上次登录时间:  {{ user.last_seen }}{% endif %}
     </h2>
     <h2 style="margin-left:130px">
-        关于我:{% if user.about_me %}{{ user.about_me }}{% endif %}
+        关于我:    {% if user.about_me %}{{ user.about_me }}{% endif %}
     </h2>
     <h2 style="margin-left:130px">{{ user.posts.count() }} 篇博客</h2>
     <h2 style="margin-left:130px">
@@ -61,5 +60,4 @@
             </a>
             {% endif %}
         </h2>
-{% endblock %}
 {% endblock %}

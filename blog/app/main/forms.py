@@ -21,11 +21,18 @@ class ProfileForm(FlaskForm):
     submit = SubmitField(u'提交')
 
 
+class EditProfileForm(FlaskForm):
+    real_name = StringField(u'姓名', validators=[Length(0, 64)])
+    age = IntegerField(u'年龄')
+    location = StringField(u'地址', validators=[Length(0, 64)])
+    about_me = TextAreaField(u'关于我')
+    submit = SubmitField(u'提交')
+
+
 class EditAdminForm(FlaskForm):
     email = StringField(u'邮箱', validators=[DataRequired(), Length(1, 64), Email()])
     username = StringField(u'用户名', validators=[
         DataRequired(), Length(1, 64), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0, u'用户名只能是字母、数字、点和下划线')])
-    # confirmed = BooleanField(u'确认')
     role = SelectField(u'权限', coerce=int)
     real_name = StringField(u'姓名', validators=[Length(0, 64)])
     location = StringField(u'地址', validators=[Length(0, 64)])

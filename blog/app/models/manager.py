@@ -11,6 +11,7 @@ from . import db
 
 
 class RoleManager(object):
+
     @staticmethod
     def insert_roles():
         roles = {
@@ -84,10 +85,46 @@ class UserManager(object):
     def is_administrator(user):
         return UserManager.can(user, Permission.ADMINISTER)
 
-    '''
-    def ping(self):
-        last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    @staticmethod
+    def ping(user):
+        user.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # db.session.add(user)
 
+    @staticmethod
+    def edit_profile(user, param):
+        user.real_name = param.real_name.data
+        user.age = param.age.data
+        user.location = param.location.data
+        user.about_me = param.about_me.data
+
+    @staticmethod
+    def get_profile(user, param):
+        param.real_name.data = user.real_name
+        param.age.data = user.age
+        param.location.data = user.location
+        param.about_me.data = user.about_me
+        return param
+
+    @staticmethod
+    def edit_profile_admin(user, param):
+        user.email = param.email.data
+        user.username = param.username.data
+        user.role_id = Role.query.get(param.role.data).id
+        user.real_name = param.real_name.data
+        user.location = param.location.data
+        user.about_me = param.about_me.data
+
+    @staticmethod
+    def get_profile_admin(user, param):
+        param.email.data = user.email
+        param.username.data = user.username
+        param.role.data = user.role_id
+        param.real_name.data = user.real_name
+        param.location.data = user.location
+        param.about_me.data = user.about_me
+        return param
+
+'''
     def follow(self, user):
         if not self.is_following(user):
             f = Follow(followed=user)

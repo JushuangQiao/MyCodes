@@ -11,9 +11,9 @@
     </div>
 {% endfor %}
     <div class="page-head">
-        <h1>登录</h1>
+        <h1 style="margin-left:300px">登录</h1>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4" style="margin-left:300px">
         {{ wtf.quick_form(form) }}
         <br>
         <p style="color:red">新用户? <a href="{{ url_for('auth.register') }}">点击这里注册</a> .</p>

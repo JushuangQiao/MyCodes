@@ -2,10 +2,10 @@
 
 import logging
 from flask import render_template, session, url_for, redirect, request, abort
-from flask import make_response
+from flask import make_response, flash
 from flask_login import login_required, current_user
 from . import main
-from .forms import ProfileForm, EditAdminForm, PostForm, CommentForm
+from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
 from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
@@ -62,6 +62,7 @@ def user(username='World'):
 
 
 @main.route('/user/<username>/details')
+@login_required
 def user_detail(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
@@ -72,24 +73,16 @@ def user_detail(username):
 @main.route('/user/<username>/edit-profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile(username):
-    form = ProfileForm()
+    form = EditProfileForm()
     try:
         if form.validate_on_submit():
-            current_user.real_name = form.real_name.data
-            current_user.age = form.age.data
-            current_user.location = form.location.data
-            current_user.about_me = form.about_me.data
-            db.session.add(current_user)
-            # flash(u'您的资料已更改')
+            UserManager.edit_profile(current_user, form)
+            flash(u'您的资料已更改')
             return redirect(url_for('main.user_detail', username=username))
-        form.real_name = current_user.real_name
-        form.age = current_user.age
-        form.location = current_user.location
-        form.about_me = current_user.about_me
-        return render_template('main/edit_profile.html', form=form)
+        return render_template('main/edit_profile.html', form=UserManager.get_profile(current_user, form))
     except Exception, e:
         logging.error('func:edit_profile error:{0}'.format(e))
-        return render_template('main/edit_profile.html', form=None)
+        return render_template('main/edit_profile.html', form=form)
 
 
 @main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
@@ -100,24 +93,14 @@ def edit_profile_admin(id):
     form = EditAdminForm(user=user)
     try:
         if form.validate_on_submit():
-            user.email = form.email.data
-            user.username = form.username.data
-            user.role = Role.query.get(form.role.data)
-            user.real_name = form.real_name.data
-            user.location = form.location.data
-            user.about_me = form.about_me.data
-            db.session.add(user)
-            # flash('The profile has been updated.')
-            return redirect(url_for('main.user', name=user.username))
-        form.email.data = user.email
-        form.username.data = user.username
-        form.role.data = user.role_id
-        form.real_name.data = user.real_name
-        form.location.data = user.location
-        form.about_me.data = user.about_me
+            UserManager.edit_profile_admin(user, form)
+            flash(u'资料已更改')
+            return redirect(url_for('main.user_detail', username=user.username))
+        form = UserManager.get_profile_admin(current_user, form)
         return render_template('main/edit_profile.html', form=form, user=user)
     except Exception, e:
         logging.error('func: edit_profile_admin error:{0}'.format(e))
+        return render_template('main/edit_profile.html', form=form, user=user)
 
 
 @main.route('/post/<int:id>', methods=['GET', 'POST'])

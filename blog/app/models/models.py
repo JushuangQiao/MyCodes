@@ -78,9 +78,6 @@ class User(UserMixin, db.Model):
         # self.followed = followed
         # self.followers = followers
 
-    def ping(self):
-        self.last_seen = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     def follow(self, user):
         if not self.is_following(user):
             f = Follow(followed=user)

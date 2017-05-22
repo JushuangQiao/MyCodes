@@ -12,7 +12,7 @@ from .. import db
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated:
-        current_user.ping()
+        UserManager.ping(current_user)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
