@@ -48,8 +48,8 @@ def register():
             return redirect(url_for('auth.login'))
         return render_template('auth/register.html', form=form)
     except Exception, e:
-        logging.error('func: register info:{0}'.format(e))
-        return render_template('auth/register.html', form=None)
+        logging.error('func: register error:{0}'.format(e))
+        return render_template('auth/register.html', form=form)
 
 
 @auth.route('/change-password', methods=['GET', 'POST'])
