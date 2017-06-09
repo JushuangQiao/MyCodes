@@ -8,7 +8,7 @@ class TestUserModel(unittest.TestCase):
 
     def test_password_setter(self):
         u = User(username='test', email='test@gmail.com', password='123456')
-        # u = User(password='123456')
+        # u = User(password='123456') delete
         self.assertTrue(u.password_hash is not None)
 
     def test_no_password_getter(self):
