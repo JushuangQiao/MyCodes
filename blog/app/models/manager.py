@@ -3,7 +3,7 @@
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
-from blog.app import login_manager
+from .. import login_manager
 from datetime import datetime
 from flask import current_app, url_for
 from .models import User, Follow, Permission, Post, Role
@@ -95,6 +95,7 @@ class UserManager(object):
         user.age = param.age.data
         user.location = param.location.data
         user.about_me = param.about_me.data
+        db.session.add(user)
 
     @staticmethod
     def get_profile(user, param):
@@ -112,6 +113,7 @@ class UserManager(object):
         user.real_name = param.real_name.data
         user.location = param.location.data
         user.about_me = param.about_me.data
+        db.session.add(user)
 
     @staticmethod
     def get_profile_admin(user, param):
@@ -122,6 +124,12 @@ class UserManager(object):
         param.location.data = user.location
         param.about_me.data = user.about_me
         return param
+
+    @staticmethod
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(str(user_id)))
+
 
 '''
     def follow(self, user):
@@ -173,7 +181,6 @@ class PostManager(object):
     def add_post(body=None, author=None):
         try:
             post = Post(body=body, author_id=author.id)
-            print post.body, post.author_id
             db.session.add(post)
             db.session.commit()
         except Exception, e:
@@ -181,6 +188,7 @@ class PostManager(object):
 
     @staticmethod
     def generate_fake(count=32):
+        from sqlalchemy.exc import IntegrityError
         from random import seed, randint
         import forgery_py
 
@@ -192,4 +200,7 @@ class PostManager(object):
                      timestamp=forgery_py.date.date(True),
                      author_id=u)
             db.session.add(p)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()

@@ -4,7 +4,7 @@ from functools import wraps
 from flask import abort
 from flask_login import current_user
 from .models.models import Permission
-from blog.app.models.manager import UserManager
+from .models.manager import UserManager
 
 
 def permission_required(permissions):

@@ -11,6 +11,7 @@ from setting import config
 
 bootstrap = Bootstrap()
 moment = Moment()
+
 db = SQLAlchemy()
 mail = Mail()
 pagedown = PageDown()

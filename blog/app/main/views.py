@@ -9,7 +9,7 @@ from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
 from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
-from blog.app.models.manager import UserManager, PostManager
+from ..models.manager import UserManager, PostManager
 
 logging.basicConfig(filename='running_error.log')
 

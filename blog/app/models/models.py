@@ -126,11 +126,6 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-
 class Post(db.Model):
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)

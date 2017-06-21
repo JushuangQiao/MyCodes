@@ -6,7 +6,7 @@ main = Blueprint('main', __name__)
 
 from . import views, errors
 from ..models.models import Permission
-from blog.app.models.manager import UserManager
+from ..models.manager import UserManager
 
 
 @main.app_context_processor
