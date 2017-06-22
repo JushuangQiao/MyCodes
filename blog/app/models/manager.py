@@ -55,6 +55,14 @@ class UserManager(object):
             logging.error('class: UserManager failed {0}'.format(e))
 
     @staticmethod
+    def change_password(user, param):
+        try:
+            user.password = generate_password_hash(str(param.password.data))
+            db.session.add(user)
+        except Exception, e:
+            logging.error('class: UserManager failed {0}'.format(e))
+
+    @staticmethod
     def generate_fake(count=32):
         from sqlalchemy.exc import IntegrityError
         from random import seed

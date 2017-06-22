@@ -53,13 +53,13 @@ def register():
 
 
 @auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
 def change_password():
     form = ChangePasswordForm()
     try:
         if form.validate_on_submit():
-            if current_user.verify_password(form.old_password.data):
-                current_user.password = form.password.data
-                db.session.add(current_user)
+            if current_user:
+                UserManager.change_password(current_user, form)
                 flash(u'密码已修改')
                 return redirect(url_for('main.home'))
             else:
