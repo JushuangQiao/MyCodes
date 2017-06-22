@@ -3,19 +3,15 @@
 
 {% block title %}登录{% endblock %}
 
-{% block content %}
-{% for message in get_flashed_messages() %}
-    <div class="alert alert-warning" style="color:red;background-color:palegreen;margin-left:300px;margin-right:800px">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message }}
-    </div>
-{% endfor %}
+{% block page_content %}
     <div class="page-head">
         <h1 style="margin-left:300px">登录</h1>
     </div>
     <div class="col-md-4" style="margin-left:300px">
         {{ wtf.quick_form(form) }}
-        <br>
-        <p style="color:red">新用户? <a href="{{ url_for('auth.register') }}">点击这里注册</a> .</p>
+        <br />
+        <p style="color:red">新用户? <a href="{{ url_for('auth.register') }}">点击这里注册</a></p>
+        <br />
+        <p style="color:red">忘记密码? <a href="{{ url_for('auth.reset_password') }}">点击找回</a></p>
     </div>
 {% endblock %}

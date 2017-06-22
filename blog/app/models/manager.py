@@ -134,6 +134,16 @@ class UserManager(object):
         return param
 
     @staticmethod
+    def get_user_by_name(username):
+        user = User.query.filter_by(username=username).first()
+        return user if user else False
+
+    @staticmethod
+    def get_user_by_email(email):
+        user = User.query.filter_by(email=email).first()
+        return user if user else False
+
+    @staticmethod
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(str(user_id)))
