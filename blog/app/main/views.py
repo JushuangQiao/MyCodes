@@ -95,7 +95,7 @@ def edit_profile_admin(id):
             UserManager.edit_profile_admin(user, form)
             flash(u'资料已更改')
             return redirect(url_for('main.user_detail', username=user.username))
-        form = UserManager.get_profile_admin(current_user, form)
+        form = UserManager.get_profile_admin(user, form)
         return render_template('main/edit_profile.html', form=form, user=user)
     except Exception, e:
         logging.error('func: edit_profile_admin error:{0}'.format(e))
