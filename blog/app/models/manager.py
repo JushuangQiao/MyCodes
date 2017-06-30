@@ -41,6 +41,8 @@ class UserManager(object):
             user.password = generate_password_hash(str(param.password.data))
             user.email = param.email.data
             db.session.add(user)
+            UserManager.follow(user, user)
+            db.session.add(user)
         except Exception, e:
             logging.error('class: UserManager failed {0}'.format(e))
 
@@ -149,36 +151,30 @@ class UserManager(object):
     def load_user(user_id):
         return User.query.get(int(str(user_id)))
 
-
-'''
-    def follow(self, user):
-        if not self.is_following(user):
-            f = Follow(followed=user)
-            self.followed.append(f)
-
-    def unfollow(self, user):
-        f = self.followed.filter_by(followed_id=user.id).first()
-        if f:
-            self.followed.remove(f)
-
-    def is_following(self, user):
-        return self.followed.filter_by(followed_id=user.id).first() is not None
-
-    def is_followed_by(self, user):
-        return self.followers.filter_by(follower_id=user.id).first() is not None
-
-    @property
-    def followed_posts(self):
-        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
+    @staticmethod
+    def follow(user, followed):
+        if not UserManager.is_following(user, followed):
+            f = Follow(user.id, followed.id)
+            user.followed.append(f)
 
     @staticmethod
-    def add_follow_self():
-        for user in User.query.all():
-            if not user.is_following(user):
-                user.follow(user)
-                db.session.add(user)
-                db.session.commit()
+    def unfollow(user, followed):
+        f = user.followed.filter_by(followed_id=followed.id).first()
+        if f:
+            user.followed.remove(f)
 
+    @staticmethod
+    def is_following(user, followed):
+        return user.followed.filter_by(followed_id=followed.id).first() is not None
+
+    @staticmethod
+    def is_followed_by(user, followed):
+        return user.followers.filter_by(follower_id=followed.id).first() is not None
+
+    @staticmethod
+    def followed_posts(user):
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == user.id)
+'''
     def to_json(self):
         json_user = {
             'url': url_for('api.get_user', id=self.id, _external=True),

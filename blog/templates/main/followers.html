@@ -4,11 +4,17 @@
 {% block title %}{{ title }} {{ user.username }}{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>{{ title }} {{ user.username }}</h1>
+<div class="page-header" style="margin-left: 150px">
+    <h1>我{{ title }}</h1>
 </div>
-<table class="table table-hover followers">
-    <thead><tr><th>用户</th><th>关注时间</th></tr></thead>
+<div>
+<table class="table table-hover followers" style="margin-left: 150px; width: 100%">
+    <thead style="margin-right: 300px">
+        <tr>
+            <th data-file-width="20%">用户</th>
+            <th data-file-width="60">关注时间</th>
+        </tr>
+    </thead>
     {% for follow in follows %}
     <tr>
         <td>
@@ -20,7 +26,8 @@
     </tr>
     {% endfor %}
 </table>
-<div class="pagination">
+</div>
+<div class="pagination" style="margin-left: 150px">
     {{ macros.pagination_widget(pagination, endpoint, username = user.username) }}
 </div>
 {% endblock %}

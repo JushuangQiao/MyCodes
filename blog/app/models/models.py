@@ -36,6 +36,10 @@ class Follow(db.Model):
     followed_id = Column(Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = Column(DateTime(), default=datetime.utcnow)
 
+    def __init__(self, *args):
+        self.follower_id = args[0]
+        self.followed_id = args[1]
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -66,42 +70,11 @@ class User(UserMixin, db.Model):
         self.age = age
         self.password = password
         self.role_id = Role.query.filter_by(default=True).first().id if role_id is None else int(role_id)
-        # self.follow(self)
         self.real_name = real_name
         self.location = location
         self.about_me = about_me
         self.member_since = member_since
         self.last_seen = last_seen
-        # self.followed = followed
-        # self.followers = followers
-
-    def follow(self, user):
-        if not self.is_following(user):
-            f = Follow(followed=user)
-            self.followed.append(f)
-
-    def unfollow(self, user):
-        f = self.followed.filter_by(followed_id=user.id).first()
-        if f:
-            self.followed.remove(f)
-
-    def is_following(self, user):
-        return self.followed.filter_by(followed_id=user.id).first() is not None
-
-    def is_followed_by(self, user):
-        return self.followers.filter_by(follower_id=user.id).first() is not None
-
-    @property
-    def followed_posts(self):
-        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
-
-    @staticmethod
-    def add_follow_self():
-        for user in User.query.all():
-            if not user.is_following(user):
-                user.follow(user)
-                db.session.add(user)
-                db.session.commit()
 
     def to_json(self):
         json_user = {

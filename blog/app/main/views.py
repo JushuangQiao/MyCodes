@@ -49,7 +49,7 @@ def user(username='World'):
         if current_user.is_authenticated:
             show_followed = bool(request.cookies.get('show_followed', ''))
         if show_followed:
-            query = current_user.followed_posts
+            query = UserManager.followed_posts(current_user)
         else:
             query = Post.query
         pagination = query.order_by(Post.timestamp.desc()).paginate(page, per_page=10, error_out=False)
@@ -153,9 +153,9 @@ def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return redirect(url_for('main.user_detail', username=username))
-    if current_user.is_following(user):
+    if UserManager.is_following(current_user, user):
         return redirect(url_for('main.user_detail', username=username))
-    current_user.follow(user)
+    UserManager.follow(current_user, user)
     return redirect(url_for('main.user_detail', username=username))
 
 
@@ -166,9 +166,9 @@ def unfollow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return redirect(url_for('main.user_detail', username=username))
-    if not current_user.is_following(user):
+    if not UserManager.is_following(current_user, user):
         return redirect(url_for('main.user_detail', username=username))
-    current_user.unfollow(user)
+    UserManager.unfollow(current_user, user)
     return redirect(url_for('main.user_detail', username=username))
 
 
@@ -181,7 +181,7 @@ def followers(username):
     pagination = user.followers.paginate(page, per_page=10, error_out=False)
     follows = [{'user': item.follower, 'timestamp': item.timestamp}
                for item in pagination.items]
-    return render_template('main/followers.html', user=user, title=u"关注",
+    return render_template('main/followers.html', user=user, title=u"关注的人",
                            endpoint='.followers', pagination=pagination,
                            follows=follows)
 
@@ -196,7 +196,7 @@ def followed_by(username):
         page, per_page=10, error_out=False)
     follows = [{'user': item.followed, 'timestamp': item.timestamp}
                for item in pagination.items]
-    return render_template('main/followers.html', user=user, title=u"粉丝",
+    return render_template('main/followers.html', user=user, title=u"的粉丝",
                            endpoint='.followed_by', pagination=pagination,
                            follows=follows)
 
