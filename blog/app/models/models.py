@@ -129,22 +129,17 @@ login_manager.anonymous_user = AnonymousUser
 class Post(db.Model):
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
+    title = Column(String(256))
     body = Column(Text)
     body_html = Column(Text)
     timestamp = Column(DateTime(), index=True, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey('users.id'))
     comments = relationship('Comment', backref='post', lazy='dynamic')
 
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
-        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags,
-                                                       strip=True))
-
     def to_json(self):
         json_post = {
             'url': url_for('api.get_post', id=self.id, _external=True),
+            'title': self.title,
             'body': self.body,
             'body_html': self.body_html,
             'timestamp': self.timestamp,
@@ -162,8 +157,6 @@ class Post(db.Model):
         if body is None or body == '':
             raise ValidationError('post does not have a body')
         return Post(body=body)
-
-db.event.listen(Post.body, 'set', Post.on_changed_body)
 
 
 class Comment(db.Model):

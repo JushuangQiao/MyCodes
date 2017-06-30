@@ -3,9 +3,10 @@
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
+import bleach
+from markdown import markdown
 from .. import login_manager
 from datetime import datetime
-from flask import current_app, url_for
 from .models import User, Follow, Permission, Post, Role
 from . import db
 
@@ -196,13 +197,20 @@ class UserManager(object):
 class PostManager(object):
 
     @staticmethod
-    def add_post(body=None, author=None):
+    def add_post(title=None, body=None, author=None):
         try:
-            post = Post(body=body, author_id=author.id)
+            post = Post(title=title, body=body, author_id=author.id)
             db.session.add(post)
             db.session.commit()
         except Exception, e:
             logging.error('class PostManager add_post failed:{0}'.format(e))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags,
+                                                       strip=True))
 
     @staticmethod
     def generate_fake(count=32):
@@ -214,7 +222,7 @@ class PostManager(object):
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
-            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+            p = Post(title=forgery_py.name.title(), body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
                      timestamp=forgery_py.date.date(True),
                      author_id=u)
             db.session.add(p)
@@ -222,3 +230,5 @@ class PostManager(object):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+db.event.listen(Post.body, 'set', PostManager.on_changed_body)

@@ -11,11 +11,17 @@
                     {{ moment(post.timestamp).fromNow() }}
             </div>
             <br/>
+            <div class="post-title">
+                <h3>{{ post.title }}</h3>
+            </div>
+            <br/>
             <div class="post-body">
-                {% if post.body_html %}
-                    {{ post.body_html | safe }}
-                {% else %}
-                    {{ post.body }}
+                {% if istitle %}
+                    {% if post.body_html %}
+                        {{ post.body_html | safe }}
+                    {% else %}
+                        {{ post.body }}
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="post-footer">

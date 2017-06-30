@@ -22,7 +22,7 @@ def home():
         return redirect(url_for('main.show_all'))
     try:
         if UserManager.can(current_user, Permission.WRITE_ARTICLES) and form.validate_on_submit():
-            PostManager.add_post(body=form.body.data, author=current_user)
+            PostManager.add_post(title=form.title.data, body=form.body.data, author=current_user)
             return redirect(url_for('main.home'))
     except Exception, e:
         logging.error('func: home writing failed:{0}'.format(e))
@@ -32,7 +32,8 @@ def home():
         pagination = Post.query.filter_by(author_id=current_user.id).order_by(Post.timestamp.desc()).paginate(
             page, per_page=10, error_out=False)
         posts = pagination.items
-        return render_template('main/home.html', form=form, posts=posts, pagination=pagination)
+        istitle = 0
+        return render_template('main/home.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
     except Exception, e:
         print e
         logging.error('func: home failed:{0}'.format(e))
@@ -117,7 +118,9 @@ def post(id):
         pagination = posts.comments.order_by(Comment.timestamp.asc()).paginate(
             page, per_page=10, error_out=False)
         comments = pagination.items
-        return render_template('main/post.html', posts=[posts], form=form, pagination=pagination, comments=comments)
+        istitle = 1
+        return render_template('main/post.html', posts=[posts], form=form,
+                               istitle=istitle, pagination=pagination, comments=comments)
     except Exception, e:
         logging.error('func: post error:{0}'.format(e))
         abort(500)
@@ -132,9 +135,11 @@ def edit_post(id):
     form = PostForm()
     try:
         if form.validate_on_submit():
+            post.title = form.title.data
             post.body = form.body.data
             db.session.add(post)
             return redirect(url_for('main.post', id=post.id))
+        form.title.data = post.title
         form.body.data = post.body
         return render_template('main/edit_post.html', form=form)
     except Exception, e:
