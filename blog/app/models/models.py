@@ -3,8 +3,6 @@
 from datetime import datetime
 from flask import current_app, url_for
 from flask_login import UserMixin, AnonymousUserMixin
-import bleach
-from markdown import markdown
 from ..exceptions import ValidationError
 from . import *
 from .. import login_manager
@@ -141,10 +139,3 @@ class Comment(db.Model):
     disabled = Column(Boolean)
     author_id = Column(Integer, ForeignKey('users.id'))
     post_id = Column(Integer, ForeignKey('posts.id'))
-
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i', 'strong']
-        target.body_html = bleach.linkify(bleach.clean(
-            markdown(value, output_format='html'), tags=allowed_tags, strip=True))
-db.event.listen(Comment.body, 'set', Comment.on_changed_body)

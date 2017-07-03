@@ -7,7 +7,7 @@ import bleach
 from markdown import markdown
 from .. import login_manager
 from datetime import datetime
-from .models import User, Follow, Permission, Post, Role
+from .models import User, Follow, Permission, Post, Role, Comment
 from . import db
 
 
@@ -227,4 +227,15 @@ class PostManager(object):
             except IntegrityError:
                 db.session.rollback()
 
+
+class CommentManager(object):
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i', 'strong']
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+
+
 db.event.listen(Post.body, 'set', PostManager.on_changed_body)
+db.event.listen(Comment.body, 'set', CommentManager.on_changed_body)
