@@ -9,7 +9,7 @@ from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
 from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
 from ..decorators import admin_required, permission_required
-from ..models.manager import UserManager, PostManager
+from ..models.manager import UserManager, PostManager, CommentManager
 
 logging.basicConfig(filename='running_error.log')
 
@@ -109,8 +109,7 @@ def post(id):
     form = CommentForm()
     try:
         if form.validate_on_submit():
-            comment = Comment(body=form.body.data, post=posts, author=current_user._get_current_object())
-            db.session.add(comment)
+            CommentManager.add_comment(body=form.body.data, post=posts, author=current_user)
             return redirect(url_for('main.post', id=posts.id, page=-1))
         page = request.args.get('page', 1, type=int)
         if page == -1:

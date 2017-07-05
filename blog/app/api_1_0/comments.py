@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from flask import jsonify, request, g, url_for
-from .. import db
+from ..models.manager import CommentManager
 from ..models.models import Post, Permission, Comment
 from . import api
 from ..decorators import permission_required
@@ -20,7 +20,7 @@ def get_comments():
     if pagination.has_next:
         next = url_for('api.get_comments', page=page+1, _external=True)
     return jsonify({
-        'comments': [comment.to_json() for comment in comments],
+        'comments': [comment.body for comment in comments],
         'prev': prev,
         'next': next,
         'count': pagination.total
@@ -30,7 +30,7 @@ def get_comments():
 @api.route('/comments/<int:id>')
 def get_comment(id):
     comment = Comment.query.get_or_404(id)
-    return jsonify(comment.to_json())
+    return jsonify(comment=comment.body)
 
 
 @api.route('/posts/<int:id>/comments/')
@@ -47,7 +47,7 @@ def get_post_comments(id):
     if pagination.has_next:
         next = url_for('api.get_post_comments', page=page+1, _external=True)
     return jsonify({
-        'comments': [comment.to_json() for comment in comments],
+        'comments': [comment.body for comment in comments],
         'prev': prev,
         'next': next,
         'count': pagination.total
@@ -58,10 +58,5 @@ def get_post_comments(id):
 @permission_required(Permission.COMMENT)
 def new_post_comment(id):
     post = Post.query.get_or_404(id)
-    comment = Comment.from_json(request.json)
-    comment.author = g.current_user
-    comment.post = post
-    db.session.add(comment)
-    db.session.commit()
-    return jsonify(comment.to_json()), 201, \
-        {'Location': url_for('api.get_comment', id=comment.id, _external=True)}
+    CommentManager.add_comment(body=request.form.get('body'), post=post, author=g.current_user)
+    return jsonify({'success': True})

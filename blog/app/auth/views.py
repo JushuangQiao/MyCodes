@@ -19,7 +19,8 @@ def login():
     form = LoginForm()
     try:
         if form.validate_on_submit():
-            user = UserManager.verify_password(form)
+            email, password, remember_me = form.email.data, form.password.data, form.remember_me.data
+            user = UserManager.verify_password(email, password, remember_me)
             if user:
                 return redirect(request.args.get('next') or url_for('main.home'))
             flash(u'用户名或密码错误')

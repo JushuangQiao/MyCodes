@@ -1,12 +1,15 @@
 # coding=utf-8
 
 import logging
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app, url_for
 from flask_login import login_user
 import bleach
 from markdown import markdown
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from ..exceptions import ValidationError
 from .. import login_manager
-from datetime import datetime
 from .models import User, Follow, Permission, Post, Role, Comment
 from . import db
 
@@ -47,11 +50,11 @@ class UserManager(object):
             logging.error('class: UserManager failed {0}'.format(e))
 
     @staticmethod
-    def verify_password(param):
+    def verify_password(email, password, remember_me=None):
         try:
-            user = User.query.filter_by(email=param.email.data).first()
-            if user is not None and check_password_hash(user.password, str(param.password.data)):
-                login_user(user, param.remember_me.data)
+            user = User.query.filter_by(email=email).first()
+            if user is not None and check_password_hash(user.password, str(password)):
+                login_user(user, remember_me)
                 return user
             return False
         except Exception, e:
@@ -174,20 +177,34 @@ class UserManager(object):
     @staticmethod
     def followed_posts(user):
         return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == user.id)
-'''
-    def to_json(self):
+
+    @staticmethod
+    def generate_auth_token(user, expiration):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'id': user.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
+
+    @staticmethod
+    def to_json(user):
         json_user = {
-            'url': url_for('api.get_user', id=self.id, _external=True),
-            'username': self.username,
-            'member_since': self.member_since,
-            'last_seen': self.last_seen,
-            'posts': url_for('api.get_user_posts', id=self.id, _external=True),
+            'url': url_for('api.get_user', id=user.id, _external=True),
+            'username': user.username,
+            'member_since': user.member_since,
+            'last_seen': user.last_seen,
+            'posts': url_for('api.get_user_posts', id=user.id, _external=True),
             'followed_posts': url_for('api.get_user_followed_posts',
-                                      id=self.id, _external=True),
-            'post_count': self.posts.count()
+                                      id=user.id, _external=True),
+            'post_count': user.posts.count()
         }
         return json_user
-    '''
 
 
 class PostManager(object):
@@ -227,8 +244,33 @@ class PostManager(object):
             except IntegrityError:
                 db.session.rollback()
 
+    @staticmethod
+    def to_json(post):
+        json_post = {
+            'url': url_for('api.get_post', id=post.id, _external=True),
+            'title': post.title,
+            'body': post.body,
+            'body_html': post.body_html,
+            'timestamp': post.timestamp,
+            'author': url_for('api.get_user', id=post.author_id,
+                              _external=True),
+            'comments': url_for('api.get_post_comments', id=post.id,
+                                _external=True),
+            'comment_count': post.comments.count()
+        }
+        return json_post
+
 
 class CommentManager(object):
+
+    @staticmethod
+    def add_comment(body=None, post=None, author=None):
+        try:
+            comment = Comment(body=body, post_id=post.id, author_id=author.id)
+            db.session.add(comment)
+            db.session.commit()
+        except Exception, e:
+            logging.error('class CommentManager add_post failed:{0}'.format(e))
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
