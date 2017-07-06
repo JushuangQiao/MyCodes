@@ -1,13 +1,13 @@
 # coding=utf-8
 
 import logging
-from flask import render_template, session, url_for, redirect, request, abort
+from flask import render_template, url_for, redirect, request, abort
 from flask import make_response, flash
 from flask_login import login_required, current_user
 from . import main
 from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
 from .. import db
-from ..models.models import User, Role, Permission, Post, Comment, AnonymousUser
+from ..models.models import User, Permission, Post, Comment
 from ..decorators import admin_required, permission_required
 from ..models.manager import UserManager, PostManager, CommentManager
 

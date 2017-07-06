@@ -17,7 +17,7 @@ class TestUserModel(unittest.TestCase):
         with self.assertRaises(AttributeError):
             u.password
 
-    def test_password_verification(self):
+    def test_password_verificatwion(self):
         u = User(username='test', email='ver@gmail.com', password='123456')
         # u = User(password='123456')
         self.assertTrue(u.verify_password('123456'))
