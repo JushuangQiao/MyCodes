@@ -8,7 +8,6 @@ from flask_login import login_user
 import bleach
 from markdown import markdown
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from ..exceptions import ValidationError
 from .. import login_manager
 from .models import User, Follow, Permission, Post, Role, Comment
 from . import db
