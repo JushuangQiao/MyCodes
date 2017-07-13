@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from datetime import datetime
-from flask import current_app, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from . import *
 from .. import login_manager
