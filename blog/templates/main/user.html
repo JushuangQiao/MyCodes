@@ -2,35 +2,26 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "main/_macros.html" as macros %}
 
-{% block title %}用户{% endblock %}
-
-{% block content %}
+{% block title %}主页{% endblock %}
 {% block page_content %}
-    <div class="page-header">
-        <h1 style="margin-left:200px">Hello, {{ user.username }}!</h1>
-        {% if not known %}
-        <p style="margin-left:220px">Pleased to meet you!</p>
-        {% else %}
-        <p style="margin-left:220px">Happy to see you again!</p>
-        {% endif %}
-    </div>
-{% endblock %}
-<div class="post-tabs">
-    <ul class="nav nav-tabs" style="margin-left:180px">
-        <li {% if not show_followed %} class="active"{% endif %}>
-            <a href="{{ url_for('main.show_all') }}">全部</a>
-        </li>
-        {% if current_user.is_authenticated %}
-        <li {% if show_followed %} class="active"{% endif %}>
-            <a href="{{ url_for('main.show_followed') }}">关注</a>
-        </li>
-        {% endif %}
-    </ul>
-    {% include 'main/_posts.html' %}
+<div class="page-header">
+        <h1 style="margin-left:200px">
+            Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}World{% endif %}!
+        </h1>
 </div>
+<div style="margin-left:200px; margin-right:600px">
+    {% if UserManager.can(current_user, Permission.WRITE_ARTICLES) %}
+    {{ wtf.quick_form(form) }}
+    {% endif %}
+</div>
+{% include 'main/_posts.html' %}
 {% if pagination %}
 <div class="pagination" style="margin-left:200px">
-    {{ macros.pagination_widget(pagination, 'main.user', username=user.username) }}
+    {{ macros.pagination_widget(pagination, 'main.home') }}
 </div>
 {% endif %}
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
 {% endblock %}

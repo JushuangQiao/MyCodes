@@ -14,9 +14,8 @@ from ..models.manager import UserManager, PostManager, CommentManager
 logging.basicConfig(filename='running_error.log')
 
 
-@main.route('/')
-@main.route('/home', methods=['GET', 'POST'])
-def home():
+@main.route('/user/<username>', methods=['GET', 'POST'])
+def user(username='World'):
     form = PostForm()
     if current_user.is_anonymous:
         return redirect(url_for('main.show_all'))
@@ -33,16 +32,17 @@ def home():
             page, per_page=10, error_out=False)
         posts = pagination.items
         istitle = 0
-        return render_template('main/home.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
+        return render_template('main/user.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
     except Exception, e:
         print e
         logging.error('func: home failed:{0}'.format(e))
         abort(500)
 
 
-@main.route('/user/<username>', methods=['GET', 'POST'])
-def user(username='World'):
-    user = User.query.filter_by(username=username).first_or_404()
+@main.route('/')
+@main.route('/home', methods=['GET', 'POST'])
+def home():
+    user = User.query.filter_by(username=current_user.username).first_or_404()
     page = request.args.get('page', 1, type=int)
     show_followed = False
     try:
@@ -54,7 +54,7 @@ def user(username='World'):
             query = Post.query
         pagination = query.order_by(Post.timestamp.desc()).paginate(page, per_page=10, error_out=False)
         posts = pagination.items
-        return render_template('main/user.html', posts=posts, user=user,
+        return render_template('main/home.html', posts=posts, user=user,
                                show_followed=show_followed, pagination=pagination)
     except Exception, e:
         logging.error('func:user error:{0}'.format(e))
@@ -210,7 +210,7 @@ def show_all():
         posts = pagination.items
         return render_template('main/all_posts.html', posts=posts, pagination=pagination)
     else:
-        resp = make_response(redirect(url_for('main.user', username=current_user.username)))
+        resp = make_response(redirect(url_for('main.home')))
         resp.set_cookie('show_followed', '', max_age=30*24*60*60)
         return resp
 
@@ -218,7 +218,7 @@ def show_all():
 @main.route('/followed')
 @login_required
 def show_followed():
-    resp = make_response(redirect(url_for('main.user', username=current_user.username)))
+    resp = make_response(redirect(url_for('main.home')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
 
