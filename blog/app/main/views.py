@@ -16,6 +16,7 @@ logging.basicConfig(filename='running_error.log')
 
 @main.route('/blog', methods=['GET', 'POST'])
 def blog():
+    user = User.query.filter_by(username=current_user.username).first_or_404()
     form = PostForm()
     if current_user.is_anonymous:
         return redirect(url_for('main.show_all'))
@@ -26,17 +27,7 @@ def blog():
     except Exception, e:
         logging.error('func: home writing failed:{0}'.format(e))
         abort(500)
-    try:
-        page = request.args.get('page', 1, type=int)
-        pagination = Post.query.filter_by(author_id=current_user.id).order_by(Post.timestamp.desc()).paginate(
-            page, per_page=10, error_out=False)
-        posts = pagination.items
-        istitle = 0
-        return render_template('main/blog.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
-    except Exception, e:
-        print e
-        logging.error('func: home failed:{0}'.format(e))
-        abort(500)
+    return render_template('main/blog.html', user=user, form=form)
 
 
 @main.route('/')
@@ -67,7 +58,17 @@ def user_detail(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
-    return render_template('main/user_detail.html', user=user)
+    try:
+        page = request.args.get('page', 1, type=int)
+        pagination = Post.query.filter_by(author_id=current_user.id).order_by(Post.timestamp.desc()).paginate(
+            page, per_page=10, error_out=False)
+        posts = pagination.items
+        istitle = 0
+        return render_template('main/user_detail.html', user=user, istitle=istitle, posts=posts, pagination=pagination)
+    except Exception, e:
+        print e
+        logging.error('func: detail failed:{0}'.format(e))
+        abort(500)
 
 
 @main.route('/user/<username>/edit-profile', methods=['GET', 'POST'])

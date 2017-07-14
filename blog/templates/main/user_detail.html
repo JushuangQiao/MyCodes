@@ -4,7 +4,8 @@
 {% block title %}用户资料{% endblock %}
 
 {% block page_content %}
-    <div>
+<div class="container">
+    <div class="'row well">
         <table  style="margin-left: 200px" width="100%">
             <caption style="font-size: xx-large; color: slateblue">
                 用户资料：{{ user.username }}
@@ -87,4 +88,11 @@
             {% endif %}
         </h2>
     </div>
+    <div class="row">
+        <div class="col-md-12 col-xs-12 well">
+            <h3>{{ user.username }}发表的文章</h3>
+            {% include 'include/_post.html' %}
+        </div>
+    </div>
+</div>
 {% endblock %}
