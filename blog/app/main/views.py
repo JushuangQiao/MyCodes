@@ -14,8 +14,8 @@ from ..models.manager import UserManager, PostManager, CommentManager
 logging.basicConfig(filename='running_error.log')
 
 
-@main.route('/user/<username>', methods=['GET', 'POST'])
-def user(username='World'):
+@main.route('/blog', methods=['GET', 'POST'])
+def blog():
     form = PostForm()
     if current_user.is_anonymous:
         return redirect(url_for('main.show_all'))
@@ -32,7 +32,7 @@ def user(username='World'):
             page, per_page=10, error_out=False)
         posts = pagination.items
         istitle = 0
-        return render_template('main/user.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
+        return render_template('main/blog.html', istitle=istitle, form=form, posts=posts, pagination=pagination)
     except Exception, e:
         print e
         logging.error('func: home failed:{0}'.format(e))
