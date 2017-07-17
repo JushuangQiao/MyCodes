@@ -33,7 +33,6 @@ def blog():
 @main.route('/')
 @main.route('/home', methods=['GET', 'POST'])
 def home():
-    user = User.query.filter_by(username=current_user.username).first_or_404()
     page = request.args.get('page', 1, type=int)
     show_followed = False
     try:
@@ -45,8 +44,7 @@ def home():
             query = Post.query
         pagination = query.order_by(Post.timestamp.desc()).paginate(page, per_page=10, error_out=False)
         posts = pagination.items
-        return render_template('main/home.html', posts=posts, user=user,
-                               show_followed=show_followed, pagination=pagination)
+        return render_template('main/home.html', posts=posts, show_followed=show_followed, pagination=pagination)
     except Exception, e:
         logging.error('func:user error:{0}'.format(e))
         abort(500)
