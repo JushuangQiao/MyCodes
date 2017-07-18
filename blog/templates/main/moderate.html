@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "main/_macros.html" as macros %}
+{% import "include/_macros.html" as macros %}
 
 {% block title %}评论管理{% endblock %}
 
@@ -10,7 +10,7 @@
     </div>
     <div>
         {% set moderate = True %}
-        {% include 'main/_comments.html' %}
+        {% include 'include/_comment.html' %}
     </div>
     {% if pagination %}
     <div class="pagination">
