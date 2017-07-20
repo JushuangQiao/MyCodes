@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+数据模型管理部分
+"""
 import logging
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash

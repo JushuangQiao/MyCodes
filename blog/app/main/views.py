@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+主要的接口
+"""
 import logging
 from flask import render_template, url_for, redirect, request, abort
 from flask import make_response, flash

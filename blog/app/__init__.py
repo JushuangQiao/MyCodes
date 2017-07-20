@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+app的工厂函数
+"""
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment

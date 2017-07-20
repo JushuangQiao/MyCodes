@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+数据表模型
+"""
 from datetime import datetime
 from flask_login import UserMixin, AnonymousUserMixin
 from . import *
@@ -7,6 +10,9 @@ from .. import login_manager
 
 
 class Permission:
+    """
+    权限
+    """
     FOLLOW = 0x01
     COMMENT = 0x02
     WRITE_ARTICLES = 0x04
@@ -15,6 +21,9 @@ class Permission:
 
 
 class Role(db.Model):
+    """
+    用户角色类型
+    """
     __tablename__ = 'roles'
     id = Column(Integer, primary_key=True)
     name = Column(String(64), unique=True)
@@ -27,6 +36,9 @@ class Role(db.Model):
 
 
 class Follow(db.Model):
+    """
+    用户关注
+    """
     __tablename__ = 'follows'
     follower_id = Column(Integer, db.ForeignKey('users.id'), primary_key=True)
     followed_id = Column(Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -38,6 +50,9 @@ class Follow(db.Model):
 
 
 class User(UserMixin, db.Model):
+    """
+    用户模型
+    """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(64), index=True)
@@ -77,12 +92,18 @@ class User(UserMixin, db.Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
+    """
+    匿名用户
+    """
     pass
 
 login_manager.anonymous_user = AnonymousUser
 
 
 class Post(db.Model):
+    """
+    文章
+    """
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
     title = Column(String(256))
@@ -94,6 +115,9 @@ class Post(db.Model):
 
 
 class Comment(db.Model):
+    """
+    评论
+    """
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True)
     body = Column(Text)

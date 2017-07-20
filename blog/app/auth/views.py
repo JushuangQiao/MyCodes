@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+用户登录部分
+"""
 import logging
 from flask import render_template, redirect, url_for, request, flash
 from flask_login import logout_user, login_required, current_user

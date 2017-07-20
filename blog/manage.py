@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+入口文件
+"""
 import os
 from app import create_app, db
 from app.models.models import Permission, Follow, Comment
