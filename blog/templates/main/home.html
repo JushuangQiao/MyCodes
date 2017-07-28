@@ -10,7 +10,7 @@
     <div class="page-header">
         <h1>
             {% if current_user.is_authenticated %}
-            你好, {{ current_user.username }}
+            你好, {{ current_user.real_name }}
             {% else %}
             文章列表
             {% endif %}

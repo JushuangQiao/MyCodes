@@ -18,6 +18,7 @@ class RegistrationForm(FlaskForm):
     email = StringField(u'邮箱', validators=[DataRequired(), Length(1, 64), Email()])
     username = StringField(u'用户名', validators=[DataRequired(), Length(1, 64),
                                                Regexp('^[a-zA-Z][a-zA-Z0-9._]*$', 0, u'用户名格式不正确')])
+    real_name = StringField(u'姓名', validators=[DataRequired(), Length(1, 64)])
     password = PasswordField(u'密码', validators=[DataRequired(), EqualTo('password2', message=u'输入密码不一致')])
     password2 = PasswordField(u'确认密码', validators=[DataRequired()])
     submit = SubmitField(u'注册')

@@ -43,6 +43,7 @@ class UserManager(object):
         user = User()
         try:
             user.username = param.username.data
+            user.real_name = param.real_name.data
             user.password = generate_password_hash(str(param.password.data))
             user.email = param.email.data
             db.session.add(user)
