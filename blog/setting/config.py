@@ -6,8 +6,6 @@ from logging.handlers import RotatingFileHandler
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-LOG_FILE = logging.basicConfig(filename='running_error.log', level=logging.INFO)
-
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'Do not tell you'

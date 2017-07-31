@@ -3,6 +3,7 @@
 """
 app的工厂函数
 """
+import os
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
@@ -27,6 +28,7 @@ def create_app(config_name):
     # folder 定义了template和static的位置
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     app.config.from_object(config[config_name])
+    app.logger.addHandler(config[config_name].handler)
     config[config_name].init_app(app)
 
     bootstrap.init_app(app)
@@ -36,13 +38,16 @@ def create_app(config_name):
     pagedown.init_app(app)
     login_manager.init_app(app)
 
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
-
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-
-    from .api_1_0 import api as api_1_0_blueprint
-    app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
-
     return app
+
+
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+
+from .main import main as main_blueprint
+app.register_blueprint(main_blueprint)
+
+from .auth import auth as auth_blueprint
+app.register_blueprint(auth_blueprint, url_prefix='/auth')
+
+from .api_1_0 import api as api_1_0_blueprint
+app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')

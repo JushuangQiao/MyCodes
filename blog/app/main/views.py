@@ -3,22 +3,21 @@
 """
 主要的接口
 """
-import logging
+
 from flask import render_template, url_for, redirect, request, abort
 from flask import make_response, flash
 from flask_login import login_required, current_user
 from . import main
 from .forms import EditProfileForm, EditAdminForm, PostForm, CommentForm
-from .. import db
+from .. import db, app
 from ..models.models import User, Permission, Post, Comment
 from ..decorators import admin_required, permission_required
 from ..models.manager import UserManager, PostManager, CommentManager
 
-logging.basicConfig(filename='running_error.log')
-
 
 @main.route('/blog', methods=['GET', 'POST'])
 def blog():
+    app.logger.info('aaa')
     user = User.query.filter_by(username=current_user.username).first_or_404()
     form = PostForm()
     if current_user.is_anonymous:
@@ -28,7 +27,7 @@ def blog():
             PostManager.add_post(title=form.title.data, body=form.body.data, author=current_user)
             return redirect(url_for('main.home'))
     except Exception, e:
-        logging.error('func: home writing failed:{0}'.format(e))
+        app.logger.error('func: home writing failed:{0}'.format(e))
         abort(500)
     return render_template('main/blog.html', user=user, form=form)
 
@@ -49,7 +48,7 @@ def home():
         posts = pagination.items
         return render_template('main/home.html', posts=posts, show_followed=show_followed, pagination=pagination)
     except Exception, e:
-        logging.error('func:user error:{0}'.format(e))
+        app.logger.error('func:user error:{0}'.format(e))
         abort(500)
 
 
@@ -68,7 +67,7 @@ def user_detail(username):
         return render_template('main/user_detail.html', user=user, istitle=istitle, posts=posts, pagination=pagination)
     except Exception, e:
         print e
-        logging.error('func: detail failed:{0}'.format(e))
+        app.logger.error('func: detail failed:{0}'.format(e))
         abort(500)
 
 
@@ -83,7 +82,7 @@ def edit_profile(username):
             return redirect(url_for('main.user_detail', username=username))
         return render_template('main/edit_profile.html', form=UserManager.get_profile(current_user, form))
     except Exception, e:
-        logging.error('func:edit_profile error:{0}'.format(e))
+        app.logger.error('func:edit_profile error:{0}'.format(e))
         return render_template('main/edit_profile.html', form=form)
 
 
@@ -101,7 +100,7 @@ def edit_profile_admin(id):
         form = UserManager.get_profile_admin(user, form)
         return render_template('main/edit_profile.html', form=form, user=user)
     except Exception, e:
-        logging.error('func: edit_profile_admin error:{0}'.format(e))
+        app.logger.error('func: edit_profile_admin error:{0}'.format(e))
         return render_template('main/edit_profile.html', form=form, user=user)
 
 
@@ -123,7 +122,7 @@ def post(id):
         return render_template('main/post.html', posts=[posts], form=form,
                                istitle=istitle, pagination=pagination, comments=comments)
     except Exception, e:
-        logging.error('func: post error:{0}'.format(e))
+        app.logger.error('func: post error:{0}'.format(e))
         abort(500)
 
 
@@ -144,7 +143,7 @@ def edit_post(id):
         form.body.data = post.body
         return render_template('main/edit_post.html', form=form)
     except Exception, e:
-        logging.error('func: edit_post error:{0}'.format(e))
+        app.logger.error('func: edit_post error:{0}'.format(e))
 
 
 @main.route('/follow/<username>')

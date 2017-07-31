@@ -3,10 +3,11 @@
 """
 用户登录部分
 """
-import logging
+
 from flask import render_template, redirect, url_for, request, flash
 from flask_login import logout_user, login_required, current_user
 from . import auth
+from .. import app
 from ..models.manager import UserManager
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm, ResetPasswordForm
 
@@ -29,7 +30,7 @@ def login():
             flash(u'用户名或密码错误')
         return render_template('auth/login.html', form=form)
     except Exception, e:
-        logging.error('func: login error:{0}'.format(e))
+        app.logger.error('func: login error:{0}'.format(e))
         return render_template('auth/login.html', form=None)
 
 
@@ -51,7 +52,7 @@ def register():
             return redirect(url_for('auth.login'))
         return render_template('auth/register.html', form=form)
     except Exception, e:
-        logging.error('func: register error:{0}'.format(e))
+        app.logger.error('func: register error:{0}'.format(e))
         return render_template('auth/register.html', form=form)
 
 
@@ -69,7 +70,7 @@ def change_password():
                 flash(u'密码错误')
         return render_template('auth/change_password.html', form=form)
     except Exception, e:
-        logging.error('func: change_password error:{0}'.format(e))
+        app.logger.error('func: change_password error:{0}'.format(e))
         return render_template('auth/change_password.html', form=None)
 
 
@@ -88,6 +89,6 @@ def reset_password():
             flash(u'密码重置成功')
             return redirect(request.args.get('next') or url_for('main.home'))
     except Exception, e:
-        logging.error('func: reset_password error:{0}'.format(e))
+        app.logger.error('func: reset_password error:{0}'.format(e))
         return render_template('auth/reset_password.html', form=form)
     return render_template('auth/reset_password.html', form=form)
