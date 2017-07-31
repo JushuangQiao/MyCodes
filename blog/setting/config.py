@@ -2,9 +2,10 @@
 
 import os
 import logging
+from logging.handlers import RotatingFileHandler
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-# logging
+
 LOG_FILE = logging.basicConfig(filename='running_error.log', level=logging.INFO)
 
 
@@ -12,6 +13,11 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'Do not tell you'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    formatter = logging.Formatter(
+        "[%(asctime)s][%(pathname)s:%(lineno)d][%(levelname)s] %(message)s")
+    handler = RotatingFileHandler('./running.log')
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(formatter)
 
     @staticmethod
     def init_app(app):
