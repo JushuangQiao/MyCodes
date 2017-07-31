@@ -28,7 +28,6 @@ def create_app(config_name):
     # folder 定义了template和static的位置
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     app.config.from_object(config[config_name])
-    app.logger.addHandler(config[config_name].handler)
     config[config_name].init_app(app)
 
     bootstrap.init_app(app)

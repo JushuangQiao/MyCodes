@@ -19,7 +19,7 @@ class Config(object):
 
     @staticmethod
     def init_app(app):
-        pass
+        app.logger.addHandler(Config.handler)
 
 
 class DevelopmentConfig(Config):
