@@ -2,8 +2,8 @@
 
 from flask import g, jsonify
 from flask_httpauth import HTTPBasicAuth
-from ..models.models import User, AnonymousUser
-from ..models.manager import UserManager
+from app.models.models import User, AnonymousUser
+from app.models.manager import UserManager
 from . import api
 from .errors import unauthorized
 
