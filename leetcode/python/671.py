@@ -19,10 +19,7 @@ class Solution(object):
         while stack:
             node = stack.popleft()
             if node:
-                if node.val == ret[-1]:
-                    stack.append(node.left)
-                    stack.append(node.right)
-                elif node.val > ret[-1]:
+                if node.val > ret[-1]:
                     if len(ret) < 2:
                         ret.append(node.val)
                 else:
