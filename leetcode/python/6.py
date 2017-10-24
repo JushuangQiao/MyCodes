@@ -1,4 +1,4 @@
-ass Solution(object):
+class Solution(object):
     def convert(self, s, numRows):
         """
         :type s: str
