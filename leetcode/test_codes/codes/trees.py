@@ -54,10 +54,38 @@ class Tree(object):
             traversal(head.right)
         traversal(self.root)
         return ret
-        
+
+    def in_traversal(self):
+        ret = []
+
+        def traversal(head):
+            if not head:
+                return
+            traversal(head.left)
+            ret.append(head.val)
+            traversal(head.right)
+
+        traversal(self.root)
+        return ret
+
+    def post_traversal(self):
+        ret = []
+
+        def traversal(head):
+            if not head:
+                return
+            traversal(head.left)
+            traversal(head.right)
+            ret.append(head.val)
+
+        traversal(self.root)
+        return ret
+
 
 t = Tree()
-t.construct_tree([1,2,None,4,None])
+t.construct_tree([1, 2, None, 4, 3, None, 5])
 print t.bfs()
 print t.pre_traversal()
+print t.in_traversal()
+print t.post_traversal()
 
